@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import String, DateTime, ForeignKey
+from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infrastructure.db.base import Base
@@ -21,7 +21,7 @@ class Advertisement(Base):
     title: Mapped[str] = mapped_column(String(50))
     city: Mapped[str] = mapped_column(String(50))
     description: Mapped[str] = mapped_column(String(250))
-    date_publication: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    date_publication: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
     price: Mapped[float]
     number_of_views: Mapped[int]
     photo: Mapped[str]

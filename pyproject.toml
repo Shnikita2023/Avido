@@ -14,6 +14,7 @@ asyncpg = "^0.29.0"
 pydantic-settings = "^2.2.1"
 alembic = "^1.13.1"
 pre-commit = "^3.7.0"
+pydantic = {extras = ["email"], version = "^2.7.1"}
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^3.7.0"
@@ -34,14 +35,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 120
-extend-exclude = "tests/"
+extend-exclude = "alembic/, pg_data/, tests/"
 
 [tool.isort]
 profile = "black"
 line_length = 120
 multi_line_output = 3
 skip_gitignore = true
-skip_glob = ["tests/*"]
+skip_glob = ["alembic/*", "pg_data/*", "tests/*"]
 
 [tool.mypy]
 mypy_path = "./src"
@@ -53,8 +54,8 @@ warn_unused_ignores = true
 disallow_any_generics = true
 check_untyped_defs = true
 no_implicit_reexport = true
-pythonpath = "app"
-exclude = ["tests/"]
+pythonpath = "src"
+exclude = ["config.py", "tests/"]
 
 [tool.pytest.ini_options]
 pythonpath = [".", "src"]
