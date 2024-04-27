@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "avido"
+version = "0.1.0"
+description = ""
+authors = ["Никита Швейцер <shveitcer2023@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
