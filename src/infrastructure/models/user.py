@@ -5,19 +5,19 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infrastructure.db.base import Base
-
-
-class StatusUser(str, Enum):
-    ACTIVE = "Активный"
-    BLOCKED = "Заблокирован"
-    PENDING = "Ожидает подтверждение email"
-
-
-class Role(str, Enum):
-    ADMIN = "Администратор"
-    GUEST = "Гость"
-    USER = "Пользователь"
-    MODERATOR = "Модератор"
+#
+#
+# class StatusUser(str, Enum):
+#     ACTIVE = "Активный"
+#     BLOCKED = "Заблокирован"
+#     PENDING = "Ожидает подтверждение email"
+#
+#
+# class Role(str, Enum):
+#     ADMIN = "Администратор"
+#     GUEST = "Гость"
+#     USER = "Пользователь"
+#     MODERATOR = "Модератор"
 
 
 class User(Base):

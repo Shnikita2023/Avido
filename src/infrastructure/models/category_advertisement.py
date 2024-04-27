@@ -10,7 +10,7 @@ class Category(Base):
     title: Mapped[str] = mapped_column(String(50))
     code: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     description: Mapped[str] = mapped_column(String(250))
-    sort_order: Mapped[int]
+    # sort_order: Mapped[int]
 
     advertisements: Mapped["Advertisement"] = relationship(back_populates="category")
 

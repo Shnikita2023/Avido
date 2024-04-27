@@ -21,18 +21,17 @@ class Advertisement(Base):
     title: Mapped[str] = mapped_column(String(50))
     city: Mapped[str] = mapped_column(String(50))
     description: Mapped[str] = mapped_column(String(250))
-    date_publication: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    approved_at: Mapped[datetime] | None = mapped_column(DateTime(timezone=True))
     price: Mapped[float]
     number_of_views: Mapped[int]
-    photo: Mapped[str]
-    status_ad: Mapped[StatusAd]
+    photo: Mapped[list[str]]
+    status: Mapped[str]
+    created_by: Mapped[int] = mapped_column(ForeignKey(column="user.id", ondelete="CASCADE"))
+    category_id: Mapped[int] = mapped_column(ForeignKey(column="category.id", ondelete="CASCADE"))
 
-    user_id: Mapped[int] = mapped_column(ForeignKey(column="user.id", ondelete="CASCADE"), unique=True)
     user: Mapped["User"] = relationship(back_populates="advertisements")
-
-    category_id: Mapped[int] = mapped_column(ForeignKey(column="category.id", ondelete="CASCADE"), unique=True)
     category: Mapped["Category"] = relationship(back_populates="advertisements")
-
     moderation: Mapped["Moderation"] = relationship(back_populates="advertisement", uselist=False)
 
     def __str__(self):
