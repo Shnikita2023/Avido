@@ -8,7 +8,7 @@ include .env.dev
 export
 
 run_server:
-	uvicorn src.application.api.main:app --reload
+	uvicorn application.web.app:app --reload
 
 dev_migration:
 	alembic revision --autogenerate -m "Initial tables"
