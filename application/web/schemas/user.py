@@ -1,11 +1,13 @@
+import uuid
+
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 from pydantic import Field as f
 
-from application.domain.entities.user import User as DomainUser
+from application.domain.entities.user import User as DomainUser, User
 
 
-class UserCreate(BaseModel):
+class UserInput(BaseModel):
     model_config = ConfigDict(strict=True)
 
     first_name: str = f(title="Имя")
@@ -21,20 +23,23 @@ class UserCreate(BaseModel):
     )
 
 
-class UserShow(UserCreate):
+UserOutput = User
 
-    @staticmethod
-    def from_entity(user: DomainUser) -> "UserShow":
-        return UserShow(
-            first_name=user.first_name,
-            last_name=user.last_name,
-            middle_name=user.middle_name,
-            email=user.email,
-            role=user.role.name,
-            number_phone=user.number_phone,
-            time_call=user.time_call,
-            status=user.status.name
-        )
+# class UserOutput(UserInput):
+#     user_id: uuid.UUID
+#
+#     @staticmethod
+#     def from_entity(user: DomainUser) -> "UserShow":
+#         return UserShow(
+#             first_name=user.first_name,
+#             last_name=user.last_name,
+#             middle_name=user.middle_name,
+#             email=user.email,
+#             role=user.role.name,
+#             number_phone=user.number_phone,
+#             time_call=user.time_call,
+#             status=user.status.name
+#         )
 
 
 class UserUpdate(UserCreate):

@@ -38,9 +38,9 @@ class User(Base):
             status=Status[self.status]
         )
 
-    @staticmethod
-    def from_entity(user: DomainUser) -> "User":
-        return User(
+    @classmethod
+    def from_entity(cls, user: DomainUser) -> "User":
+        return cls(
             oid=user.oid,
             first_name=user.first_name,
             last_name=user.last_name,

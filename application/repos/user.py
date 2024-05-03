@@ -74,7 +74,7 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
         except SQLAlchemyError as exc:
             raise DBError(exc)
 
-    async def put(self, user: DomainUser) -> DomainUser:
+    async def update(self, user: DomainUser) -> DomainUser:
         try:
             updated_user: dict[str, str] = User.to_dict(user=user)
             stmt = update(User).where(User.oid == user.oid).values(updated_user)

@@ -7,36 +7,34 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field as f, field_validato
 from application.exceptions.domain.user import FullNameValidationError, PhoneValidationError
 
 
-class Status(str, Enum):
-    ACTIVE = "Активный"
-    BLOCKED = "Заблокирован"
-    PENDING = "Ожидает подтверждение email"
-
-
-class Role(str, Enum):
-    ADMIN = "Администратор"
-    GUEST = "Гость"
-    USER = "Пользователь"
-    MODERATOR = "Модератор"
-
-
 class User(BaseModel):
+    class Role(str, Enum):
+        ADMIN = "Администратор"
+        GUEST = "Гость"
+        USER = "Пользователь"
+        MODERATOR = "Модератор"
+
+    class Status(str, Enum):
+        ACTIVE = "Активный"
+        BLOCKED = "Заблокирован"
+        PENDING = "Ожидает подтверждение email"
+
     model_config = ConfigDict(strict=True)
 
-    oid: UUID = f(title="Идентификатор", default_factory=lambda: str(uuid4()))
+    oid: UUID = f(title="Идентификатор", default_factory=lambda: uuid4().hex)
     first_name: str = f(title="Имя")
     last_name: str = f(title="Фамилия")
     middle_name: str | None = f(default=None, title="Отчество")
     role: Role = f(title="Роль")
     email: EmailStr = f(title="Емайл")
     number_phone: str = f(title="Номер телефона")
-    time_call: str = f(
+    time_call: str | None = f(
         title="Время звонка",
         description="Когда удобно принимать звонки",
-        min_length=1,
+        default=None,
         max_length=50
     )
-    status: Status = f(title="Статус")
+    status: Status = f(title="Статус", default=Status.PENDING)
 
     @field_validator("first_name", "last_name", "middle_name")
     @classmethod

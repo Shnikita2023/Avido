@@ -11,28 +11,27 @@ from .user import User
 from application.exceptions.domain.ad import PhotoValidationError
 
 
-class Status(str, Enum):
-    DRAFT = "Черновик"
-    ON_MODERATION = "На модерации"
-    REJECTED_FOR_REVISION = "Отклонено, к доработке"
-    REMOVED = "Снято/Продано"
-    ACTIVE = "Опубликована"
-
-
 class Advertisement(BaseModel):
+    class Status(str, Enum):
+        DRAFT = "Черновик"
+        ON_MODERATION = "На модерации"
+        REJECTED_FOR_REVISION = "Отклонено, к доработке"
+        REMOVED = "Снято/Продано"
+        ACTIVE = "Опубликована"
+
     model_config = ConfigDict(strict=True)
 
     oid: UUID = f(title="Идентификатор", default_factory=lambda: str(uuid4()))
     title: str = f(title="Название", min_length=1, max_length=50)
     city: str = f(title="Город", min_length=1, max_length=50)
-    description: str = f(title="Описание", min_length=1, max_length=250)
+    description: str = f(title="Описание", default_factory=str, max_length=250)
     price: Decimal = f(title="Цена", ge=0)
-    created_at: datetime = f(title="Дата создание", default_factory=func.utcnow())
+    created_at: datetime = f(title="Дата создание", default_factory=datetime.utcnow)
     approved_at: datetime | None = f(title="Дата публикации", default=None)
-    number_views: int = f(title="Количество просмотров", ge=0)
-    photo: list[str] = f(title="Фотки", description="Ссылки на фото")
+    number_of_views: int = f(default=0, title="Количество просмотров", ge=0)
+    photo: list[str] = f(default_factory=list, title="Фотки", description="Ссылки на фото")
     status: Status = f(title="Cтатус")
-    user: User = f(title="Пользователь")
+    author: User = f(title="Пользователь")
     category: Category = f(title="Категория")
 
     @field_validator("photo")
@@ -40,4 +39,7 @@ class Advertisement(BaseModel):
     def validate_photo(cls, photo: list[str]) -> list[str]:
         if 11 > len(photo) > 0:
             return photo
-        raise PhotoValidationError()
+        raise PhotoValidationError
+
+    def to_dict(self):
+        raise NotImplemented

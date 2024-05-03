@@ -2,40 +2,43 @@ from uuid import UUID
 
 from pydantic import EmailStr
 
-from application.domain.entities.user import User as DomainUser, Role, Status
+from application.domain.entities.user import User as DomainUser, Role, Status, User
 from application.exceptions.domain.user import UserNotFoundError, UserAlreadyExistsError
+from application.infrastructure.unit_of_work_manager import get_unit_of_work
 from application.services.uof.unit_of_work import AbstractUnitOfWork
 from application.web.schemas.user import UserCreate, UserShow, UserUpdate
 
 
 class UserService:
 
-    @staticmethod
-    async def get_user_by_id(user_oid: UUID, uow: AbstractUnitOfWork) -> UserShow:
-        async with uow:
-            user = await uow.users.get(user_oid)
+    uow: AbstractUnitOfWork
+
+    def __init__(self, uow=None):
+        self.uow = uow if uow else await get_unit_of_work()
+
+    async def get_user_by_id(self, user_oid: UUID) -> User:
+        async with self.uow:
+            user = await self.uow.users.get(user_oid)
             if user:
                 return UserShow.from_entity(user)
 
-            raise UserNotFoundError()
+            raise UserNotFoundError
 
-    @staticmethod
-    async def get_multi_users_by_id(user_oids: list[UUID], uow: AbstractUnitOfWork) -> list[UserShow]:
-        async with uow:
-            users: list[DomainUser] = await uow.users.get_multi(user_oids)
+    async def get_multi_users_by_id(self, user_oids: list[UUID]) -> list[User]:
+        async with self.uow:
+            users: list[DomainUser] = await self.uow.users.get_multi(user_oids)
             if users:
                 return [UserShow.from_entity(user) for user in users]
-
-            raise UserNotFoundError()
+            raise UserNotFoundError
 
     @staticmethod
-    async def get_all_users(uow: AbstractUnitOfWork) -> list[UserShow]:
+    async def get_all_users(uow: AbstractUnitOfWork) -> list[User]:
         async with uow:
             users: list[DomainUser] = await uow.users.all()
             if users:
                 return [UserShow.from_entity(user) for user in users]
 
-            raise UserNotFoundError()
+            raise UserNotFoundError
 
     @staticmethod
     async def update_user(cls, user_oid: UUID, data: UserUpdate, uow: AbstractUnitOfWork) -> UserShow:
