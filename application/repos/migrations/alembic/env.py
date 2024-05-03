@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 from application.config import settings
-from application.infrastructure.base import Base
+from application.infrastructure.database import Base
 from application.repos.models.category_ad import Category
 from application.repos.models.user import User
 from application.repos.models.ad import Advertisement

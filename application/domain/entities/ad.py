@@ -8,7 +8,7 @@ from sqlalchemy import func
 
 from .category_ad import Category
 from .user import User
-from ..exceptions.ad import PhotoValidationError
+from application.exceptions.domain.ad import PhotoValidationError
 
 
 class Status(str, Enum):

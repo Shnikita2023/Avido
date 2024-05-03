@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import ForeignKey, String, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from application.infrastructure.base import Base
+from application.infrastructure.database import Base
 
 
 class Advertisement(Base):

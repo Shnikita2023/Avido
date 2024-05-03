@@ -4,7 +4,7 @@ from sqlalchemy import String, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from application.domain.entities.user import User as DomainUser, Role, Status
-from application.infrastructure.base import Base
+from application.infrastructure.database import Base
 
 
 class User(Base):
@@ -36,6 +36,20 @@ class User(Base):
             number_phone=self.number_phone,
             time_call=self.time_call,
             status=Status[self.status]
+        )
+
+    @staticmethod
+    def from_entity(user: DomainUser) -> "User":
+        return User(
+            oid=user.oid,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            middle_name=user.middle_name,
+            email=user.email,
+            role=user.role.name,
+            number_phone=user.number_phone,
+            time_call=user.time_call,
+            status=user.status.name
         )
 
     @staticmethod

@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field as f, field_validator
 
-from ..exceptions.user import FullNameValidationError, PhoneValidationError
+from application.exceptions.domain.user import FullNameValidationError, PhoneValidationError
 
 
 class Status(str, Enum):

@@ -2,7 +2,7 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field as f, field_validator
 
-from ..exceptions.category import CodeValidationError
+from application.exceptions.domain.category import CodeValidationError
 
 
 class Category(BaseModel):

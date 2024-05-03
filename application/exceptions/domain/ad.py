@@ -1,4 +1,4 @@
-from application.domain.exceptions.base import ApplicationException
+from application.exceptions.base import ApplicationException
 
 
 class PhotoValidationError(ApplicationException):
