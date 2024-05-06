@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field as f, field_validator
 
-from application.exceptions.domain.user import FullNameValidationError, PhoneValidationError
+from application.exceptions.domain import FullNameValidationError, PhoneValidationError
 
 
 class User(BaseModel):
@@ -21,11 +21,11 @@ class User(BaseModel):
 
     model_config = ConfigDict(strict=True)
 
-    oid: UUID = f(title="Идентификатор", default_factory=lambda: uuid4().hex)
+    oid: UUID = f(title="Идентификатор", default_factory=uuid4)
     first_name: str = f(title="Имя")
     last_name: str = f(title="Фамилия")
     middle_name: str | None = f(default=None, title="Отчество")
-    role: Role = f(title="Роль")
+    role: Role = f(title="Роль", default=Role.USER)
     email: EmailStr = f(title="Емайл")
     number_phone: str = f(title="Номер телефона")
     time_call: str | None = f(
@@ -50,3 +50,14 @@ class User(BaseModel):
         if not number_phone.startswith(("7", "8")) or not number_phone.isdigit() or len(number_phone) != 11:
             raise PhoneValidationError(number_phone)
         return number_phone
+
+    @classmethod
+    def to_entity(cls, data) -> "User":
+        return cls(
+                first_name=data.first_name,
+                last_name=data.last_name,
+                middle_name=data.middle_name,
+                email=data.email,
+                number_phone=data.number_phone,
+                time_call=data.time_call,
+            )

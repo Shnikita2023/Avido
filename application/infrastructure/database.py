@@ -12,7 +12,7 @@ class Base(DeclarativeBase):
 
 DATABASE_URL: str = settings.db.database_url_asyncpg
 
-engine: AsyncEngine = create_async_engine(DATABASE_URL)
+engine: AsyncEngine = create_async_engine(DATABASE_URL, echo=True)
 async_session_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(
     engine,
     class_=AsyncSession,

@@ -1,10 +1,14 @@
 from abc import abstractmethod, ABC
 
+from application.repos.ad import AbstractAdvertisementRepository, SQLAlchemyAdvertisementRepository
+from application.repos.category_ad import AbstractCategoryAdRepository, SQLAlchemyCategoryAdRepository
 from application.repos.user import AbstractUserRepository, SQLAlchemyUserRepository
 
 
 class AbstractUnitOfWork(ABC):
     users: AbstractUserRepository
+    category: AbstractCategoryAdRepository
+    advertisement: AbstractAdvertisementRepository
 
     @abstractmethod
     def __init__(self) -> None:
@@ -34,6 +38,8 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
     async def __aenter__(self) -> None:
         self.session = self.session_factory()
         self.users = SQLAlchemyUserRepository(self.session)
+        self.category = SQLAlchemyCategoryAdRepository(self.session)
+        self.advertisement = SQLAlchemyAdvertisementRepository(self.session)
 
     async def __aexit__(self, *args) -> None:
         await self.rollback()

@@ -1,8 +1,8 @@
 """Initial tables
 
-Revision ID: 65dd6963ba13
+Revision ID: 7bad8e060d1a
 Revises: 
-Create Date: 2024-05-02 23:49:12.904394
+Create Date: 2024-05-06 15:32:02.856346
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '65dd6963ba13'
+revision: str = '7bad8e060d1a'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -28,6 +28,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('oid')
     )
     op.create_index(op.f('ix_category_code'), 'category', ['code'], unique=True)
+    op.create_index(op.f('ix_category_title'), 'category', ['title'], unique=True)
     op.create_table('user',
     sa.Column('oid', sa.Uuid(), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('first_name', sa.String(length=50), nullable=False),
@@ -50,13 +51,13 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.Column('approved_at', sa.DateTime(), nullable=True),
     sa.Column('price', sa.Numeric(), nullable=False),
-    sa.Column('number_views', sa.Integer(), nullable=False),
+    sa.Column('number_of_views', sa.Integer(), nullable=False),
     sa.Column('photo', sa.String(), nullable=False),
     sa.Column('status', sa.String(), nullable=False),
-    sa.Column('created_by', sa.Uuid(), nullable=False),
-    sa.Column('category_oid', sa.Uuid(), nullable=False),
-    sa.ForeignKeyConstraint(['category_oid'], ['category.oid'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['created_by'], ['user.oid'], ondelete='CASCADE'),
+    sa.Column('author_id', sa.Uuid(), nullable=False),
+    sa.Column('category_id', sa.Uuid(), nullable=False),
+    sa.ForeignKeyConstraint(['author_id'], ['user.oid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['category_id'], ['category.oid'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('oid')
     )
     op.create_table('moderation',
@@ -64,12 +65,12 @@ def upgrade() -> None:
     sa.Column('moderation_date', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.Column('is_approved', sa.Boolean(), nullable=False),
     sa.Column('rejection_reason', sa.String(), nullable=False),
-    sa.Column('moderated_by', sa.Uuid(), nullable=False),
-    sa.Column('advertisement_oid', sa.Uuid(), nullable=False),
-    sa.ForeignKeyConstraint(['advertisement_oid'], ['advertisement.oid'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['moderated_by'], ['user.oid'], ondelete='CASCADE'),
+    sa.Column('moderator_id', sa.Uuid(), nullable=False),
+    sa.Column('advertisement_id', sa.Uuid(), nullable=False),
+    sa.ForeignKeyConstraint(['advertisement_id'], ['advertisement.oid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['moderator_id'], ['user.oid'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('oid'),
-    sa.UniqueConstraint('advertisement_oid')
+    sa.UniqueConstraint('advertisement_id')
     )
     # ### end Alembic commands ###
 
@@ -81,6 +82,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_user_number_phone'), table_name='user')
     op.drop_index(op.f('ix_user_email'), table_name='user')
     op.drop_table('user')
+    op.drop_index(op.f('ix_category_title'), table_name='category')
     op.drop_index(op.f('ix_category_code'), table_name='category')
     op.drop_table('category')
     # ### end Alembic commands ###

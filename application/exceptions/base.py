@@ -1,4 +1,5 @@
 class ApplicationException(Exception):
+    text: str
 
     @property
     def message(self) -> str:

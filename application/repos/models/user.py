@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import String, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from application.domain.entities.user import User as DomainUser, Role, Status
+from application.domain.entities.user import User as DomainUser
 from application.infrastructure.database import Base
 
 
@@ -32,10 +32,10 @@ class User(Base):
             last_name=self.last_name,
             middle_name=self.middle_name,
             email=self.email,
-            role=Role[self.role],
+            role=DomainUser.Role[self.role],
             number_phone=self.number_phone,
             time_call=self.time_call,
-            status=Status[self.status]
+            status=DomainUser.Status[self.status]
         )
 
     @classmethod

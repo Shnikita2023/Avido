@@ -1,6 +1,9 @@
+from dataclasses import dataclass
+
 from application.exceptions.base import ApplicationException
 
 
+@dataclass(eq=False)
 class DBError(ApplicationException):
     exception: Exception
 
