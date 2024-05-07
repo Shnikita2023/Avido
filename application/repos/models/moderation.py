@@ -1,9 +1,11 @@
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from application.domain.entities.moderation import Moderation as DomainModeration
 from application.infrastructure.database import Base
 
 
@@ -18,10 +20,29 @@ class Moderation(Base):
     rejection_reason: Mapped[str]
 
     moderator_id: Mapped[UUID] = mapped_column(ForeignKey(column="user.oid", ondelete="CASCADE"))
-    advertisement_id: Mapped[UUID] = mapped_column(
-        ForeignKey(column="advertisement.oid", ondelete="CASCADE"),
-        unique=True,
-    )
+    advertisement_id: Mapped[Optional[UUID]] = mapped_column(
+        ForeignKey(column="advertisement.oid", ondelete="SET NULL"))
 
-    user = relationship("User", back_populates="moderations")
+    user = relationship("User", back_populates="moderations", lazy="selectin")
     advertisement = relationship("Advertisement", back_populates="moderation")
+
+    @classmethod
+    def from_entity(cls, moderation: DomainModeration) -> "Moderation":
+        return cls(
+            oid=moderation.oid,
+            moderation_date=moderation.moderation_date,
+            is_approved=moderation.is_approved,
+            rejection_reason=moderation.rejection_reason,
+            moderator_id=moderation.moderator_id,
+            advertisement_id=moderation.advertisement_id,
+        )
+
+    def to_entity(self) -> DomainModeration:
+        return DomainModeration(
+            oid=self.oid,
+            moderation_date=self.moderation_date,
+            is_approved=self.is_approved,
+            rejection_reason=self.rejection_reason,
+            advertisement_id=self.advertisement_id,
+            moderator_id=self.moderator_id
+        )

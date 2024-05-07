@@ -28,17 +28,18 @@ class Advertisement(BaseModel):
     created_at: datetime = f(title="Дата создание", default_factory=datetime.utcnow)
     approved_at: datetime | None = f(title="Дата публикации", default=None)
     number_of_views: int = f(default=0, title="Количество просмотров", ge=0)
-    photo: str = f(default_factory=str, title="Фотки", description="Ссылки на фото")
+    photo: list[str] = f(default_factory=list, title="Фотки", description="Ссылки на фото")
     status: Status = f(title="Cтатус", default=Status.DRAFT)
     author: User = f(title="Автор")
     category: Category = f(title="Категория")
 
-    # @field_validator("photo")
-    # @classmethod
-    # def validate_photo(cls, photo: list[str]) -> list[str]:
-    #     if 11 > len(photo) > 0:
-    #         return photo
-    #     raise PhotoValidationError
+    @field_validator("photo")
+    @classmethod
+    def validate_photo(cls, photo: list[str]) -> list[str]:
+        if 11 > len(photo) > 0:
+            return photo
+
+        raise PhotoValidationError
 
     @classmethod
     def to_entity(cls, data) -> "Advertisement":

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete, update, Result
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,6 +19,10 @@ class AbstractAdvertisementRepository(ABC):
 
     @abstractmethod
     async def get(self, advertisement_oid: UUID) -> DomainAdvertisement | None:
+        raise NotImplemented
+
+    @abstractmethod
+    async def all(self) -> list[DomainAdvertisement] | None:
         raise NotImplemented
 
     @abstractmethod
@@ -66,11 +70,19 @@ class SQLAlchemyAdvertisementRepository(AbstractAdvertisementRepository):
         except SQLAlchemyError as exc:
             raise DBError(exc)
 
+    async def all(self) -> list[DomainAdvertisement]:
+        try:
+            result: Result = await self.session.execute(select(Advertisement))
+            return [advertisement.to_entity() for advertisement in result.scalars().all()]
+
+        except SQLAlchemyError as exc:
+            raise DBError(exc)
+
     async def get_by_params(self, params: dict[str, str | UUID]) -> list[DomainAdvertisement]:
         try:
             query = select(Advertisement).filter_by(**params)
             result = await self.session.execute(query)
-            return [category_ad.to_entity() for category_ad in result.scalars().all()]
+            return [advertisement.to_entity() for advertisement in result.scalars().all()]
 
         except SQLAlchemyError as exc:
             raise DBError(exc)

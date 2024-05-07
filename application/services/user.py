@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from pydantic import EmailStr
@@ -5,7 +6,7 @@ from pydantic import EmailStr
 from application.domain.entities.user import User as DomainUser
 from application.exceptions.domain import UserNotFoundError, UserAlreadyExistsError
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
-from application.services.uof.unit_of_work import AbstractUnitOfWork
+from .uof.unit_of_work import AbstractUnitOfWork
 from application.web.views.user.schemas import UserOutput, UserInput
 
 
@@ -18,7 +19,7 @@ class UserService:
 
     async def get_user_by_id(self, user_oid: UUID) -> UserOutput:
         async with self.uow:
-            user = await self.uow.users.get(user_oid)
+            user: Optional[DomainUser] = await self.uow.users.get(user_oid)
             if user:
                 return user
 
@@ -67,7 +68,7 @@ class UserService:
         fields = ("email", "number_phone")
         user = await self.uow.users.get_by_params(params, fields)
         if user:
-            raise UserAlreadyExistsError()
+            raise UserAlreadyExistsError
 
 
 user_service = UserService()

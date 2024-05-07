@@ -3,11 +3,13 @@ from dataclasses import dataclass
 from application.exceptions.base import ApplicationException
 
 
+@dataclass(eq=False)
 class PhotoValidationError(ApplicationException):
+    text: int
 
     @property
     def message(self) -> str:
-        return "Неверный лимит фотографий, разрешенный диапазон от 1 до 10"
+        return f"Неверный лимит в количестве {self.text} фотографий, разрешенный диапазон от 1 до 10"
 
 
 class CodeValidationError(ApplicationException):
@@ -72,12 +74,21 @@ class AdvertisementNotFoundError(ApplicationException):
 
 
 class AdvertisementAlreadyExistsError(ApplicationException):
+
     @property
     def message(self) -> str:
         return "The advertisement already exists"
 
 
 class AdvertisementStatusError(ApplicationException):
+
     @property
     def message(self) -> str:
         return "The ad can be edited only in DRAFT or REJECTED_FOR_REVISION"
+
+
+class ModerationNotFoundError(ApplicationException):
+
+    @property
+    def message(self) -> str:
+        return "The moderation was not found"

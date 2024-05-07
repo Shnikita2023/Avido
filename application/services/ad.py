@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Any
 from uuid import UUID
 
@@ -8,9 +9,9 @@ from application.exceptions.domain import (
     AdvertisementStatusError
 )
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
-from application.services.category_ad import category_ad
-from application.services.uof.unit_of_work import AbstractUnitOfWork
-from application.services.user import user_service
+from .category_ad import category_ad
+from .uof.unit_of_work import AbstractUnitOfWork
+from .user import user_service
 from application.web.views.ad.schemas import AdvertisementOutput, AdvertisementInput, AdvertisementInputUpdate
 
 
@@ -27,6 +28,27 @@ class AdvertisementService:
                 return advertisement
 
             raise AdvertisementNotFoundError
+
+    async def get_all_advertisements(self) -> list[AdvertisementOutput]:
+        async with self.uow:
+            advertisements: list[DomainAdvertisement] = await self.uow.advertisement.all()
+            if advertisements:
+                return [ad for ad in advertisements if ad.status.name == "ACTIVE"]
+
+            raise AdvertisementNotFoundError
+
+    async def update_status_advertisement(self,
+                                          advertisement_oid: UUID,
+                                          status_ad: str,
+                                          approved_at: Optional[datetime] = None):
+        advertisement: AdvertisementOutput = await self.get_advertisement_by_id(advertisement_oid)
+        if advertisement.status.name in ("REJECTED_FOR_REVISION", "DRAFT", "REMOVED"):
+            async with self.uow:
+                advertisement.status = DomainAdvertisement.Status[status_ad]
+                advertisement.approved_at = approved_at
+                await self.uow.advertisement.update(advertisement)
+                await self.uow.commit()
+                return advertisement
 
     async def delete_advertisement_by_id(self, advertisement_oid: UUID) -> None:
         advertisement: AdvertisementOutput = await self.get_advertisement_by_id(advertisement_oid)
@@ -63,7 +85,7 @@ class AdvertisementService:
 
     async def _check_existing_advertisement(self, title: str, author_id: UUID) -> None:
         params: dict[str, str | UUID] = {"title": title, "author_id": author_id}
-        advertisement = await self.uow.advertisement.get_by_params(params)
+        advertisement: list[DomainAdvertisement] = await self.uow.advertisement.get_by_params(params)
         if advertisement:
             raise AdvertisementAlreadyExistsError
 

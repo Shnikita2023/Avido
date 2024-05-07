@@ -35,11 +35,11 @@ async def add_advertisement(advertisement: AdvertisementInput) -> AdvertisementO
 
 
 @router.patch(path="/",
-              summary="Редактирование объявления",
+              summary="Частичное редактирование объявления",
               status_code=status.HTTP_200_OK,
               response_model=AdvertisementOutput)
-async def update_advertisement(advertisement_oid: UUID,
-                               new_advertisement: AdvertisementInputUpdate) -> AdvertisementOutput:
+async def update_partial_advertisement(advertisement_oid: UUID,
+                                       new_advertisement: AdvertisementInputUpdate) -> AdvertisementOutput:
     try:
         return await advertisement_service.update_partial_advertisement_by_id(advertisement_oid, new_advertisement)
 
@@ -53,6 +53,18 @@ async def update_advertisement(advertisement_oid: UUID,
 async def delete_advertisement(advertisement_oid: UUID) -> None:
     try:
         return await advertisement_service.delete_advertisement_by_id(advertisement_oid)
+
+    except ApplicationException as ex:
+        raise HTTPException(status_code=400, detail=ex.message)
+
+
+@router.patch(path="/",
+              summary="Изменение статус объявления",
+              status_code=status.HTTP_200_OK,
+              response_model=AdvertisementOutput)
+async def update_status_ad(advertisement_oid: UUID, status_ad: str) -> AdvertisementOutput:
+    try:
+        return await advertisement_service.update_status_advertisement(advertisement_oid, status_ad)
 
     except ApplicationException as ex:
         raise HTTPException(status_code=400, detail=ex.message)

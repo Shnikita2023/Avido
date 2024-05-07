@@ -1,8 +1,10 @@
+import json
 from decimal import Decimal
 from datetime import datetime
+from typing import List
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, String, text, types
+from sqlalchemy import ForeignKey, String, text, types, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from application.domain.entities.ad import Advertisement as DomainAdvertisement
@@ -22,14 +24,14 @@ class Advertisement(Base):
     approved_at: Mapped[datetime | None] = mapped_column(default=None)
     price: Mapped[Decimal]
     number_of_views: Mapped[int]
-    photo: Mapped[str]
+    photo: Mapped[list] = mapped_column(JSON)
     status: Mapped[str]
     author_id: Mapped[UUID] = mapped_column(ForeignKey(column="user.oid", ondelete="CASCADE"))
     category_id: Mapped[UUID] = mapped_column(ForeignKey(column="category.oid", ondelete="CASCADE"))
 
     user = relationship("User", back_populates="advertisements", lazy="selectin")
     category = relationship("Category", back_populates="advertisements", lazy="selectin")
-    moderation = relationship("Moderation", back_populates="advertisement", uselist=False)
+    moderation = relationship("Moderation", back_populates="advertisement", lazy="selectin")
 
     @classmethod
     def from_entity(cls, advertisement: DomainAdvertisement) -> "Advertisement":
