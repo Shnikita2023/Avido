@@ -6,7 +6,7 @@ from pydantic import EmailStr
 from application.domain.user.user import User as DomainUser
 from application.exceptions.domain import UserNotFoundError, UserAlreadyExistsError
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
-from .uof.unit_of_work import AbstractUnitOfWork
+from application.repos.uow.unit_of_work import AbstractUnitOfWork
 from application.web.views.user.schemas import UserOutput, UserInput
 
 

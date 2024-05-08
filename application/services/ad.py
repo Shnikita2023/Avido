@@ -10,7 +10,7 @@ from application.exceptions.domain import (
 )
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
 from .category_ad import category_ad
-from .uof.unit_of_work import AbstractUnitOfWork
+from application.repos.uow.unit_of_work import AbstractUnitOfWork
 from .user import user_service
 from application.web.views.ad.schemas import AdvertisementOutput, AdvertisementInput, AdvertisementInputUpdate
 
@@ -62,26 +62,29 @@ class AdvertisementService:
 
     async def update_advertisement(self,
                                    advertisement_oid: UUID,
-                                   data: Optional[AdvertisementInputUpdate] = None,
-                                   status_ad: Optional[str] = None,
-                                   approved_at: Optional[datetime] = None) -> AdvertisementOutput:
+                                   advertisement_schema: Optional[AdvertisementInputUpdate] = None
+                                   ) -> AdvertisementOutput:
         advertisement: AdvertisementOutput = await self.get_advertisement_by_id(advertisement_oid)
 
         if advertisement.status.name not in ("DRAFT", "REJECTED_FOR_REVISION"):
             raise AdvertisementStatusError
 
-        if data:
-            updated_advertisement: dict[str, Any] = data.dict(exclude_none=True)
-            for key, value in updated_advertisement.items():
-                setattr(advertisement, key, value)
-        elif status_ad:
-            advertisement.status = DomainAdvertisement.Status[status_ad]
-            advertisement.approved_at = approved_at
+        updated_advertisement: dict[str, Any] = advertisement_schema.dict(exclude_none=True)
+        for key, value in updated_advertisement.items():
+            if key in {"status", "approved_at"}:
+                continue
+            setattr(advertisement, key, value)
 
         async with self.uow:
             await self.uow.advertisement.update(advertisement)
             await self.uow.commit()
             return advertisement
 
+
+    async def approve(self):
+        ...
+
+    async def reject(self):
+        ...
 
 advertisement_service = AdvertisementService()

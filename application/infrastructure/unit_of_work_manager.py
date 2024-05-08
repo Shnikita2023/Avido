@@ -1,5 +1,5 @@
 from .database import async_session_maker
-from application.services.uof.unit_of_work import SqlAlchemyUnitOfWork
+from application.repos.uow import SqlAlchemyUnitOfWork
 
 
 def get_unit_of_work() -> SqlAlchemyUnitOfWork:

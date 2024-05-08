@@ -2,11 +2,12 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from application.domain.moderation.moderation import Moderation as DomainModeration
+from application.domain.moderation.moderation import Moderation as DomainModeration, Moderation
 from application.exceptions.domain import ModerationNotFoundError
+from application.infrastructure.bus.local import publish
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
 from application.services.ad import advertisement_service
-from application.services.uof.unit_of_work import AbstractUnitOfWork
+from application.repos.uow import AbstractUnitOfWork
 from application.web.views.moderation.schemas import ModerationInput, ModerationOutput
 
 
@@ -32,6 +33,7 @@ class ModerationService:
         async with self.uow:
             moderation_entity: DomainModeration = DomainModeration.to_entity(data)
             await self.uow.moderation.add(moderation_entity)
+            await publish(Moderation.ApproveAd(ad_id=data.advertisement_id))
             await self.uow.commit()
             return moderation_entity
 
