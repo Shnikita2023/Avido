@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field as f
 
-from application.domain.entities.category_ad import Category
+from application.domain.category_ad.category_ad import Category
 
 
 class CategoryInput(BaseModel):

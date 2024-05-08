@@ -2,10 +2,9 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from fastapi import HTTPException
 from pydantic import BaseModel, Field as f, field_validator
 
-from application.domain.entities.ad import Advertisement
+from application.domain.ad.ad import Advertisement
 from application.exceptions.domain import PhotoValidationError
 
 
@@ -21,7 +20,8 @@ class BaseAdvertisement(BaseModel):
     def validate_photo(cls, photo: list[str]) -> list[str]:
         if 11 > len(photo) > 0:
             return photo
-        raise HTTPException(status_code=400, detail=PhotoValidationError(len(photo)).message)
+
+        raise PhotoValidationError(len(photo))
 
 
 class AdvertisementInput(BaseAdvertisement):

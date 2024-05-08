@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import EmailStr
 
-from application.domain.entities.user import User as DomainUser
+from application.domain.user.user import User as DomainUser
 from application.exceptions.domain import UserNotFoundError, UserAlreadyExistsError
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
 from .uof.unit_of_work import AbstractUnitOfWork

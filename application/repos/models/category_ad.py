@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import String, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from application.domain.entities.category_ad import Category as DomainCategory
+from application.domain.category_ad.category_ad import Category as DomainCategory
 from application.infrastructure.database import Base
 
 

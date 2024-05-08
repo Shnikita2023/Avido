@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import String, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from application.domain.entities.user import User as DomainUser
+from application.domain.user.user import User as DomainUser
 from application.infrastructure.database import Base
 
 

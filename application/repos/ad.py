@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from typing import Optional
 from uuid import UUID
 
@@ -6,36 +5,10 @@ from sqlalchemy import select, delete, update, Result
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from application.domain.entities.ad import Advertisement as DomainAdvertisement
+from application.domain.ad.ad import Advertisement as DomainAdvertisement
+from application.domain.ad.ad_repository import AbstractAdvertisementRepository
 from application.exceptions.db import DBError
 from application.repos.models import Advertisement
-
-
-class AbstractAdvertisementRepository(ABC):
-
-    @abstractmethod
-    async def add(self, advertisement: DomainAdvertisement) -> DomainAdvertisement:
-        raise NotImplemented
-
-    @abstractmethod
-    async def get(self, advertisement_oid: UUID) -> DomainAdvertisement | None:
-        raise NotImplemented
-
-    @abstractmethod
-    async def all(self) -> list[DomainAdvertisement] | None:
-        raise NotImplemented
-
-    @abstractmethod
-    async def delete(self, advertisement_oid: UUID) -> None:
-        raise NotImplemented
-
-    @abstractmethod
-    async def get_by_params(self, params:  dict[str, str | UUID]) -> list[DomainAdvertisement]:
-        raise NotImplemented
-
-    @abstractmethod
-    async def update(self, user: DomainAdvertisement) -> DomainAdvertisement:
-        raise NotImplemented
 
 
 class SQLAlchemyAdvertisementRepository(AbstractAdvertisementRepository):

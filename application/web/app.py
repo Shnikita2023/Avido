@@ -1,9 +1,23 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+import logging
+from datetime import datetime
 
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from application.exceptions.base import ApplicationException
 from application.web.views import router as router_v1
 
 app = FastAPI(version="1.1.1", title="Avido", docs_url="/api/docs", debug=True)
+logger = logging.getLogger(__name__)
+
+
+@app.exception_handler(ApplicationException)
+async def application_exception_handler(request: Request, exc: ApplicationException):
+    logger.error(msg=f"Error: {exc.message} :: Status: {exc.status_code}", exc_info=exc)
+    return JSONResponse(status_code=exc.status_code, content={"status": "error",
+                                                              "data": f"{datetime.now()}",
+                                                              "detail": exc.message})
 
 app.include_router(router_v1, prefix="/api/v1")
 

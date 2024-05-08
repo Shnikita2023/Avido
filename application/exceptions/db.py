@@ -9,4 +9,4 @@ class DBError(ApplicationException):
 
     @property
     def message(self) -> str:
-        return f"Ошибка подключение к базе данных: {self.exception}"
+        return "Ошибка подключение к базе данных"

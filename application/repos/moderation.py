@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from typing import Optional
 from uuid import UUID
 
@@ -6,20 +5,10 @@ from sqlalchemy import select, Result
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from application.domain.entities.moderation import Moderation as DomainModeration
+from application.domain.moderation.moderation import Moderation as DomainModeration
+from application.domain.moderation.moderation_repository import AbstractModerationRepository
 from application.exceptions.db import DBError
 from application.repos.models import Moderation
-
-
-class AbstractModerationRepository(ABC):
-
-    @abstractmethod
-    async def add(self, moderation: DomainModeration) -> DomainModeration:
-        raise NotImplemented
-
-    @abstractmethod
-    async def get(self, moderation_oid) -> DomainModeration | None:
-        raise NotImplemented
 
 
 class SQLAlchemyModerationRepository(AbstractModerationRepository):

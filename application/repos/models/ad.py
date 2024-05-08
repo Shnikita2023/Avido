@@ -1,13 +1,11 @@
-import json
 from decimal import Decimal
 from datetime import datetime
-from typing import List
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, String, text, types, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from application.domain.entities.ad import Advertisement as DomainAdvertisement
+from application.domain.ad.ad import Advertisement as DomainAdvertisement
 from application.infrastructure.database import Base
 
 

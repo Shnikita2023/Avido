@@ -6,22 +6,17 @@ from application.exceptions.base import ApplicationException
 @dataclass(eq=False)
 class PhotoValidationError(ApplicationException):
     text: int
+    status_code = 400
 
     @property
     def message(self) -> str:
         return f"Неверный лимит в количестве {self.text} фотографий, разрешенный диапазон от 1 до 10"
 
 
-class CodeValidationError(ApplicationException):
-
-    @property
-    def message(self) -> str:
-        return "Неверный формат поля, код должен содержать латинские буквы"
-
-
 @dataclass(eq=False)
 class FullNameValidationError(ApplicationException):
     text: str
+    status_code = 400
 
     @property
     def message(self) -> str:
@@ -32,6 +27,7 @@ class FullNameValidationError(ApplicationException):
 @dataclass(eq=False)
 class PhoneValidationError(ApplicationException):
     text: str
+    status_code = 400
 
     @property
     def message(self) -> str:
@@ -39,6 +35,7 @@ class PhoneValidationError(ApplicationException):
 
 
 class UserNotFoundError(ApplicationException):
+    status_code = 400
 
     @property
     def message(self) -> str:
@@ -46,6 +43,7 @@ class UserNotFoundError(ApplicationException):
 
 
 class UserAlreadyExistsError(ApplicationException):
+    status_code = 400
 
     @property
     def message(self) -> str:
@@ -53,6 +51,7 @@ class UserAlreadyExistsError(ApplicationException):
 
 
 class CategoryNotFoundError(ApplicationException):
+    status_code = 400
 
     @property
     def message(self) -> str:
@@ -60,6 +59,7 @@ class CategoryNotFoundError(ApplicationException):
 
 
 class CategoryAlreadyExistsError(ApplicationException):
+    status_code = 400
 
     @property
     def message(self) -> str:
@@ -67,20 +67,23 @@ class CategoryAlreadyExistsError(ApplicationException):
 
 
 class AdvertisementNotFoundError(ApplicationException):
+    status_code = 400
 
     @property
     def message(self) -> str:
-        return "The advertisement was not found"
+        return "The ad was not found"
 
 
 class AdvertisementAlreadyExistsError(ApplicationException):
+    status_code = 400
 
     @property
     def message(self) -> str:
-        return "The advertisement already exists"
+        return "The ad already exists"
 
 
 class AdvertisementStatusError(ApplicationException):
+    status_code = 400
 
     @property
     def message(self) -> str:
@@ -88,6 +91,7 @@ class AdvertisementStatusError(ApplicationException):
 
 
 class ModerationNotFoundError(ApplicationException):
+    status_code = 400
 
     @property
     def message(self) -> str:

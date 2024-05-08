@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from application.domain.entities.category_ad import Category as DomainCategory
+from application.domain.category_ad.category_ad import Category as DomainCategory
 from application.exceptions.domain import CategoryNotFoundError, CategoryAlreadyExistsError
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
 from application.services.uof.unit_of_work import AbstractUnitOfWork

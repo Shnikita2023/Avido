@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field as f
 
-from application.domain.entities.moderation import Moderation
+from application.domain.moderation.moderation import Moderation
 
 
 class ModerationInput(BaseModel):

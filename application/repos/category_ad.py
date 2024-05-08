@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from typing import Optional
 from uuid import UUID
 
@@ -6,28 +5,10 @@ from sqlalchemy import select, delete, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from application.domain.entities.category_ad import Category as DomainCategory
+from application.domain.category_ad.category_ad import Category as DomainCategory
+from application.domain.category_ad.category_ad_repository import AbstractCategoryAdRepository
 from application.exceptions.db import DBError
 from application.repos.models import Category
-
-
-class AbstractCategoryAdRepository(ABC):
-
-    @abstractmethod
-    async def add(self, category_ad: DomainCategory) -> DomainCategory:
-        raise NotImplemented
-
-    @abstractmethod
-    async def get(self, category_oid: UUID) -> DomainCategory | None:
-        raise NotImplemented
-
-    @abstractmethod
-    async def delete(self, category_oid: UUID) -> None:
-        raise NotImplemented
-
-    @abstractmethod
-    async def get_by_params(self, params: dict, fields: tuple) -> list[DomainCategory]:
-        raise NotImplemented
 
 
 class SQLAlchemyCategoryAdRepository(AbstractCategoryAdRepository):

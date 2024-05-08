@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from application.domain.entities.moderation import Moderation as DomainModeration
+from application.domain.moderation.moderation import Moderation as DomainModeration
 from application.exceptions.domain import ModerationNotFoundError
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
 from application.services.ad import advertisement_service
@@ -11,7 +11,6 @@ from application.web.views.moderation.schemas import ModerationInput, Moderation
 
 
 class ModerationService:
-
     uow: AbstractUnitOfWork
 
     def __init__(self, uow=None):
@@ -27,9 +26,9 @@ class ModerationService:
 
     async def create_moderation(self, data: ModerationInput) -> ModerationOutput:
         data_ad = ("ACTIVE", datetime.utcnow()) if data.is_approved else ("REJECTED_FOR_REVISION", None)
-        await advertisement_service.update_status_advertisement(advertisement_oid=data.advertisement_id,
-                                                                status_ad=data_ad[0],
-                                                                approved_at=data_ad[1])
+        await advertisement_service.update_advertisement(advertisement_oid=data.advertisement_id,
+                                                         status_ad=data_ad[0],
+                                                         approved_at=data_ad[1])
         async with self.uow:
             moderation_entity: DomainModeration = DomainModeration.to_entity(data)
             await self.uow.moderation.add(moderation_entity)

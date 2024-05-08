@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from typing import Optional
 from uuid import UUID
 
@@ -6,44 +5,10 @@ from sqlalchemy import select, Result, update, delete, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from application.domain.entities.user import User as DomainUser
+from application.domain.user.user import User as DomainUser
+from application.domain.user.user_repository import AbstractUserRepository
 from application.exceptions.db import DBError
 from application.repos.models.user import User
-
-
-class AbstractUserRepository(ABC):
-
-    @abstractmethod
-    async def add(self, user: DomainUser) -> DomainUser:
-        raise NotImplemented
-
-    @abstractmethod
-    async def get(self, user_oid: UUID) -> DomainUser | None:
-        raise NotImplemented
-
-    @abstractmethod
-    async def get_multi(self, user_oids: list[UUID]) -> list[DomainUser]:
-        raise NotImplemented
-
-    @abstractmethod
-    async def get_by_params(self, params: dict, fields: tuple) -> list[DomainUser]:
-        raise NotImplemented
-
-    @abstractmethod
-    async def update(self, user: DomainUser) -> DomainUser:
-        raise NotImplemented
-
-    @abstractmethod
-    async def delete(self, user_oid: UUID) -> None:
-        raise NotImplemented
-
-    @abstractmethod
-    async def all(self) -> list[DomainUser] | None:
-        raise NotImplemented
-
-    @abstractmethod
-    async def search(self, offset: int, limit: int, **params) -> DomainUser | None:
-        raise NotImplemented
 
 
 class SQLAlchemyUserRepository(AbstractUserRepository):
@@ -123,4 +88,3 @@ class SQLAlchemyUserRepository(AbstractUserRepository):
 
         except SQLAlchemyError as exc:
             raise DBError(exc)
-

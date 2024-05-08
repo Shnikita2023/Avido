@@ -5,8 +5,8 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field as f, field_validator
 
-from .category_ad import Category
-from .user import User
+from application.domain.category_ad.category_ad import Category
+from application.domain.user.user import User
 from application.exceptions.domain import PhotoValidationError
 
 
@@ -39,7 +39,7 @@ class Advertisement(BaseModel):
         if 11 > len(photo) > 0:
             return photo
 
-        raise PhotoValidationError
+        raise PhotoValidationError(len(photo))
 
     @classmethod
     def to_entity(cls, data) -> "Advertisement":

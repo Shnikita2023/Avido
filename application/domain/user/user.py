@@ -42,6 +42,7 @@ class User(BaseModel):
         username_regex = r"^[А-ЯЁ][а-яё]+$|^[A-Z][a-z]+$"
         if not re.match(username_regex, value_field) or len(value_field) > 50:
             raise FullNameValidationError(value_field)
+
         return value_field
 
     @field_validator("number_phone")
@@ -49,6 +50,7 @@ class User(BaseModel):
     def validate_phone_number(cls, number_phone: str) -> str:
         if not number_phone.startswith(("7", "8")) or not number_phone.isdigit() or len(number_phone) != 11:
             raise PhoneValidationError(number_phone)
+
         return number_phone
 
     @classmethod

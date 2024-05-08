@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Any
 from uuid import UUID
 
-from application.domain.entities.ad import Advertisement as DomainAdvertisement
+from application.domain.ad.ad import Advertisement as DomainAdvertisement
 from application.exceptions.domain import (
     AdvertisementNotFoundError,
     AdvertisementAlreadyExistsError,
@@ -37,41 +37,12 @@ class AdvertisementService:
 
             raise AdvertisementNotFoundError
 
-    async def update_status_advertisement(self,
-                                          advertisement_oid: UUID,
-                                          status_ad: str,
-                                          approved_at: Optional[datetime] = None):
-        advertisement: AdvertisementOutput = await self.get_advertisement_by_id(advertisement_oid)
-        if advertisement.status.name in ("REJECTED_FOR_REVISION", "DRAFT", "REMOVED"):
-            async with self.uow:
-                advertisement.status = DomainAdvertisement.Status[status_ad]
-                advertisement.approved_at = approved_at
-                await self.uow.advertisement.update(advertisement)
-                await self.uow.commit()
-                return advertisement
-
-    async def delete_advertisement_by_id(self, advertisement_oid: UUID) -> None:
+    async def update_advertisement_status_to_removed_by_id(self, advertisement_oid: UUID) -> None:
         advertisement: AdvertisementOutput = await self.get_advertisement_by_id(advertisement_oid)
         advertisement.status = advertisement.Status.REMOVED.name
         async with self.uow:
             await self.uow.advertisement.update(advertisement)
             await self.uow.commit()
-
-    async def update_partial_advertisement_by_id(self,
-                                                 advertisement_oid: UUID,
-                                                 data: AdvertisementInputUpdate) -> AdvertisementOutput:
-        advertisement: AdvertisementOutput = await self.get_advertisement_by_id(advertisement_oid)
-        if advertisement.status.name in ("DRAFT", "REJECTED_FOR_REVISION"):
-            updated_advertisement: dict[str, Any] = data.dict(exclude_none=True)
-            for key, value in updated_advertisement.items():
-                setattr(advertisement, key, value)
-
-            async with self.uow:
-                await self.uow.advertisement.update(advertisement)
-                await self.uow.commit()
-                return advertisement
-
-        raise AdvertisementStatusError
 
     async def create_advertisement(self, data: AdvertisementInput) -> AdvertisementOutput:
         async with self.uow:
@@ -88,6 +59,29 @@ class AdvertisementService:
         advertisement: list[DomainAdvertisement] = await self.uow.advertisement.get_by_params(params)
         if advertisement:
             raise AdvertisementAlreadyExistsError
+
+    async def update_advertisement(self,
+                                   advertisement_oid: UUID,
+                                   data: Optional[AdvertisementInputUpdate] = None,
+                                   status_ad: Optional[str] = None,
+                                   approved_at: Optional[datetime] = None) -> AdvertisementOutput:
+        advertisement: AdvertisementOutput = await self.get_advertisement_by_id(advertisement_oid)
+
+        if advertisement.status.name not in ("DRAFT", "REJECTED_FOR_REVISION"):
+            raise AdvertisementStatusError
+
+        if data:
+            updated_advertisement: dict[str, Any] = data.dict(exclude_none=True)
+            for key, value in updated_advertisement.items():
+                setattr(advertisement, key, value)
+        elif status_ad:
+            advertisement.status = DomainAdvertisement.Status[status_ad]
+            advertisement.approved_at = approved_at
+
+        async with self.uow:
+            await self.uow.advertisement.update(advertisement)
+            await self.uow.commit()
+            return advertisement
 
 
 advertisement_service = AdvertisementService()

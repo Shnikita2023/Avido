@@ -1,11 +1,9 @@
 import re
 
-from fastapi import HTTPException
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
-
 from pydantic import Field as f
 
-from application.domain.entities.user import User
+from application.domain.user.user import User
 from application.exceptions.domain import FullNameValidationError, PhoneValidationError
 
 
@@ -29,14 +27,14 @@ class UserInput(BaseModel):
     def validate_full_name(cls, value_field: str) -> str:
         username_regex = r"^[А-ЯЁ][а-яё]+$|^[A-Z][a-z]+$"
         if not re.match(username_regex, value_field) or len(value_field) > 50:
-            raise HTTPException(status_code=400, detail=FullNameValidationError(value_field).message)
+            raise FullNameValidationError(value_field)
         return value_field
 
     @field_validator("number_phone")
     @classmethod
     def validate_phone_number(cls, number_phone: str) -> str:
         if not number_phone.startswith(("7", "8")) or not number_phone.isdigit() or len(number_phone) != 11:
-            raise HTTPException(status_code=400, detail=PhoneValidationError(number_phone).message)
+            raise PhoneValidationError(number_phone)
         return number_phone
 
 
