@@ -46,4 +46,5 @@ class CategoryAdService:
             return exist_category.to_schema()
 
 
-category_ad = CategoryAdService()
+def make_category_ad_service():
+    return CategoryAdService()

@@ -69,10 +69,9 @@ class UserService:
             if existing_user:
                 raise UserAlreadyExistsError
 
-            user_entity: DomainUser = DomainUser.to_entity(user_schema)
-            hashed_password: bytes = hash_password(password=user_schema.password)
-            user_entity.password = hashed_password
-            await self.uow.users.add(user_entity)
+            user: DomainUser = DomainUser.to_entity(user_schema)
+            user.encrypt_password()
+            await self.uow.users.add(user)
             await self.uow.commit()
             await self._on_after_create_user(user_schema)
             logger.info(f"Пользователь с id {user_entity.oid} успешно создан. Status: 201")
@@ -91,15 +90,13 @@ class UserService:
         async with self.uow:
             params_search = {"email": email, "status": "ACTIVE"}
             user: DomainUser | None = await self.uow.users.get_one_by_all_params(params_search)
-            if not user or email != user.email.value or not compare_passwords(password=password,
-                                                                              hashed_password=user.password.encode):
+            if not user or email != user.email.value or not user.is_password_valid(password):
                 raise InvalidUserDataError
             logger.info(f"Успешно пройдена валидация пользователя '{user.first_name}'. Status: 200")
             return user.to_schema()
 
     async def get_current_auth_user(self,
-                                    payload: Annotated[Optional[dict], Depends(token_work.get_current_token_payload)],
-                                    response: Response) -> dict:
+                                    payload: Annotated[Optional[dict], Depends(token_work.get_current_token_payload)]) -> dict:
         if payload:
             user_oid: str = payload.get("sub")
             async with self.uow:

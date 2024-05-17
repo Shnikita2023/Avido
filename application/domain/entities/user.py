@@ -1,3 +1,4 @@
+import bcrypt
 from uuid import uuid4
 
 from pydantic import Field as f
@@ -24,11 +25,11 @@ class User(BaseEntity):
     status: Status = f(title="Статус", default=Status.PENDING)
 
     @classmethod
-    def to_entity(cls, schema: UserOutput | UserInput) -> "User":
+    def from_json(cls, json: dict) -> "User":
         return cls(
-            first_name=FullName(schema.first_name),
-            last_name=FullName(schema.last_name),
-            middle_name=FullName(schema.middle_name),
+            first_name=FullName(json["first_name"]),
+            last_name=FullName(json["last_name"]),
+            middle_name=FullName(json["middle_name"]),
             email=Email(schema.email),
             password=Password("FakePassw0rd!123" if isinstance(schema, UserOutput) else schema.password),
             number_phone=Phone(schema.number_phone),
@@ -36,15 +37,14 @@ class User(BaseEntity):
             oid=schema.oid if isinstance(schema, UserOutput) else str(uuid4())
         )
 
-    def to_schema(self) -> UserOutput:
-        return UserOutput(
-            oid=self.oid,
-            first_name=self.first_name.value,
-            last_name=self.last_name.value,
-            middle_name=self.middle_name.value,
-            email=self.email.value,
-            number_phone=self.number_phone.value,
-            time_call=self.time_call,
-            role=self.role.name,
-            status=self.status.value
-        )
+    def to_json(self) -> dict:
+        return self.model_dump(mode="python")
+
+    def encrypt_password(self):
+        salt: bytes = bcrypt.gensalt()
+        pwd_bytes: bytes = self.password.encode()
+        self.password: bytes = bcrypt.hashpw(pwd_bytes, salt)
+
+    def is_password_valid(self, password: str):
+        return bcrypt.checkpw(password=password.encode(), hashed_password=self.password)
+

@@ -6,6 +6,7 @@ from fastapi import APIRouter, status, Query, Depends
 from application.services.ad import advertisement_service
 from application.services.user.user import user_service
 from application.web.views.ad.schemas import AdvertisementOutput, AdvertisementInput, AdvertisementInputUpdate
+from application.context import user as current_user
 
 router = APIRouter(prefix="/Advertisement",
                    tags=["Advertisement"])
@@ -24,7 +25,7 @@ async def get_advertisement(user_current: Annotated[dict, Depends(user_service.g
             summary="Получение всех объявлений",
             status_code=status.HTTP_200_OK)
 async def get_all_ad(user_current: Annotated[dict, Depends(user_service.get_current_auth_user)]):
-    return await advertisement_service.get_all_advertisements(user_current=user_current)
+    return await advertisement_service.get_all_advertisements(user_current=current_user.value)
 
 
 @router.post(path="/",

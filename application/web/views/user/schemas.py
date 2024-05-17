@@ -78,6 +78,9 @@ class UserInput(UserBase):
 
         return password
 
+    def to_domain(self) -> User:
+        return User.from_json(**self.model_dump(mode="python"))
+
 
 class UserOutput(UserBase):
     oid: str

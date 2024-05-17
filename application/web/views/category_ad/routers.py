@@ -11,8 +11,8 @@ router = APIRouter(prefix="/CategoryAdvertisement",
             summary="Получение категории объявления",
             status_code=status.HTTP_200_OK,
             response_model=CategoryOutput)
-async def get_category_ad(category_oid: str) -> CategoryOutput:
-    return await category_ad.get_category_by_id(category_oid=category_oid)
+async def get_category_ad(category_oid: str, service = Depends(make_category_ad_service)) -> CategoryOutput:
+    return await service.get_category_by_id(category_oid=category_oid)
 
 
 @router.post(path="/",
