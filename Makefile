@@ -11,7 +11,10 @@ run_server:
 	uvicorn application.web.app:app --reload
 
 dev_migration:
-	alembic revision --autogenerate -m "Initial tables v3"
+	alembic revision --autogenerate -m "Initial tables v4"
 
 dev_upgrade:
 	alembic upgrade head
+
+script:
+	python -m application.domain.entities.user

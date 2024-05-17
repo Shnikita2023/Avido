@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from uuid import UUID
+from typing import Any, Optional
 
-from .category_ad import Category as DomainCategory
+from application.domain.entities.category_ad import Category as DomainCategory
 
 
 class AbstractCategoryAdRepository(ABC):
@@ -11,13 +11,13 @@ class AbstractCategoryAdRepository(ABC):
         raise NotImplemented
 
     @abstractmethod
-    async def get(self, category_oid: UUID) -> DomainCategory | None:
+    async def get(self, category_oid: str) -> DomainCategory | None:
         raise NotImplemented
 
     @abstractmethod
-    async def delete(self, category_oid: UUID) -> None:
+    async def delete(self, category_oid: str) -> None:
         raise NotImplemented
 
     @abstractmethod
-    async def get_by_params(self, params: dict, fields: tuple) -> list[DomainCategory]:
+    async def get_by_params(self, params: dict[str, Any]) -> Optional[DomainCategory]:
         raise NotImplemented

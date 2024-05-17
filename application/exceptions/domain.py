@@ -4,6 +4,26 @@ from application.exceptions.base import ApplicationException
 
 
 @dataclass(eq=False)
+class PasswordValidationError(ApplicationException):
+    text: str
+    status_code = 400
+
+    @property
+    def message(self) -> str:
+        return f"Неверный формат: {self.text}"
+
+
+@dataclass(eq=False)
+class EmailValidationError(ApplicationException):
+    text: str
+    status_code = 400
+
+    @property
+    def message(self) -> str:
+        return f"Неверный формат: {self.text}"
+
+
+@dataclass(eq=False)
 class PhotoValidationError(ApplicationException):
     text: int
     status_code = 400
@@ -31,7 +51,7 @@ class PhoneValidationError(ApplicationException):
 
     @property
     def message(self) -> str:
-        return f"Неверный формат поля: {self.text}, должно содержать 11 цифр и начинаться с 7 или 8"
+        return f"Неверный формат поля phone: {self.text}, должно содержать 11 цифр и начинаться с 7 или 8"
 
 
 class UserNotFoundError(ApplicationException):
@@ -48,6 +68,14 @@ class UserAlreadyExistsError(ApplicationException):
     @property
     def message(self) -> str:
         return "The user already exists"
+
+
+class InvalidUserDataError(ApplicationException):
+    status_code = 400
+
+    @property
+    def message(self) -> str:
+        return "Invalid username or password"
 
 
 class CategoryNotFoundError(ApplicationException):
@@ -96,3 +124,28 @@ class ModerationNotFoundError(ApplicationException):
     @property
     def message(self) -> str:
         return "The moderation was not found"
+
+
+class InvalidCookieError(ApplicationException):
+    status_code = 401
+
+    @property
+    def message(self) -> str:
+        return "Invalid cookie"
+
+
+class InvalidTokenError(ApplicationException):
+    status_code = 401
+
+    @property
+    def message(self) -> str:
+        return "Invalid token"
+
+
+class AccessDeniedError(ApplicationException):
+    status_code = 403
+
+    @property
+    def message(self) -> str:
+        return "Access denied"
+

@@ -1,12 +1,12 @@
-from typing import Optional
+from typing import Optional, Any
 from uuid import UUID
 
-from sqlalchemy import select, delete, or_
+from sqlalchemy import select, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from application.domain.category_ad.category_ad import Category as DomainCategory
-from application.domain.category_ad.category_ad_repository import AbstractCategoryAdRepository
+from application.domain.entities.category_ad import Category as DomainCategory
+from application.domain.repos.category_ad import AbstractCategoryAdRepository
 from application.exceptions.db import DBError
 from application.repos.models import Category
 
@@ -24,7 +24,7 @@ class SQLAlchemyCategoryAdRepository(AbstractCategoryAdRepository):
         except SQLAlchemyError as exc:
             raise DBError(exc)
 
-    async def get(self, category_oid: UUID) -> DomainCategory | None:
+    async def get(self, category_oid: str) -> DomainCategory | None:
         try:
             query = select(Category).where(Category.oid == category_oid)
             result = await self.session.execute(query)
@@ -35,7 +35,7 @@ class SQLAlchemyCategoryAdRepository(AbstractCategoryAdRepository):
         except SQLAlchemyError as exc:
             raise DBError(exc)
 
-    async def delete(self, category_oid: UUID) -> None:
+    async def delete(self, category_oid: str) -> None:
         try:
             stmt = delete(Category).where(Category.oid == category_oid)
             await self.session.execute(stmt)
@@ -43,12 +43,13 @@ class SQLAlchemyCategoryAdRepository(AbstractCategoryAdRepository):
         except SQLAlchemyError as exc:
             raise DBError(exc)
 
-    async def get_by_params(self, params: dict, fields: tuple) -> list[DomainCategory]:
+    async def get_by_params(self, params: dict[str, Any]) -> Optional[DomainCategory]:
         try:
-            filters = [getattr(Category, field) == params.get(field) for field in fields]
-            query = select(Category).where(or_(*filters))
+            query = select(Category).filter_by(**params)
             result = await self.session.execute(query)
-            return [category_ad.to_entity() for category_ad in result.scalars().all()]
+            category_model: Optional[Category] = result.scalar_one_or_none()
+            if category_model:
+                return category_model.to_entity()
 
         except SQLAlchemyError as exc:
             raise DBError(exc)

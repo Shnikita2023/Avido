@@ -5,8 +5,8 @@ from sqlalchemy import select, Result
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from application.domain.moderation.moderation import Moderation as DomainModeration
-from application.domain.moderation.moderation_repository import AbstractModerationRepository
+from application.domain.entities.moderation import Moderation as DomainModeration
+from application.domain.repos.moderation import AbstractModerationRepository
 from application.exceptions.db import DBError
 from application.repos.models import Moderation
 
@@ -24,7 +24,7 @@ class SQLAlchemyModerationRepository(AbstractModerationRepository):
         except SQLAlchemyError as exc:
             raise DBError(exc)
 
-    async def get(self, moderation_oid: UUID) -> DomainModeration | None:
+    async def get(self, moderation_oid: str) -> DomainModeration | None:
         try:
             query = select(Moderation).where(Moderation.oid == moderation_oid)
             result: Result = await self.session.execute(query)

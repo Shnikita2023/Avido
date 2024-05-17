@@ -1,9 +1,10 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import String, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from application.domain.category_ad.category_ad import Category as DomainCategory
+from application.domain.entities.category_ad import Category as DomainCategory
 from application.infrastructure.database import Base
 
 
@@ -16,6 +17,7 @@ class Category(Base):
     title: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     code: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     description: Mapped[str] = mapped_column(String(250))
+    created_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
 
     advertisements = relationship("Advertisement", back_populates="category")
 
@@ -30,7 +32,7 @@ class Category(Base):
 
     def to_entity(self) -> DomainCategory:
         return DomainCategory(
-            oid=self.oid,
+            oid=str(self.oid),
             title=self.title,
             code=self.code,
             description=self.description,

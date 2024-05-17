@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from uuid import UUID
+from typing import Any, Optional
 
-from .ad import Advertisement as DomainAdvertisement
+from application.domain.entities.ad import Advertisement as DomainAdvertisement
 
 
 class AbstractAdvertisementRepository(ABC):
@@ -11,7 +11,7 @@ class AbstractAdvertisementRepository(ABC):
         raise NotImplemented
 
     @abstractmethod
-    async def get(self, advertisement_oid: UUID) -> DomainAdvertisement | None:
+    async def get(self, advertisement_oid: str) -> DomainAdvertisement | None:
         raise NotImplemented
 
     @abstractmethod
@@ -19,11 +19,15 @@ class AbstractAdvertisementRepository(ABC):
         raise NotImplemented
 
     @abstractmethod
-    async def delete(self, advertisement_oid: UUID) -> None:
+    async def delete(self, advertisement_oid: str) -> None:
         raise NotImplemented
 
     @abstractmethod
-    async def get_by_params(self, params:  dict[str, str | UUID]) -> list[DomainAdvertisement]:
+    async def get_all_by_params(self, params: dict[str, Any], offset: int, limit: int) -> list[DomainAdvertisement]:
+        raise NotImplemented
+
+    @abstractmethod
+    async def get_one_by_all_params(self, params: dict[str, Any]) -> Optional[DomainAdvertisement]:
         raise NotImplemented
 
     @abstractmethod

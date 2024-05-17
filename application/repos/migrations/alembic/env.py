@@ -9,10 +9,7 @@ from alembic import context
 
 from application.config import settings
 from application.infrastructure.database import Base
-from application.repos.models.category_ad import Category
-from application.repos.models.user import User
-from application.repos.models.ad import Advertisement
-from application.repos.models.moderation import Moderation
+from application.repos.models import *
 
 config = context.config
 

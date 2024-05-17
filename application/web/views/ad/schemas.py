@@ -1,11 +1,12 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
-from uuid import UUID
 
 from pydantic import BaseModel, Field as f, field_validator
 
-from application.domain.ad.ad import Advertisement
 from application.exceptions.domain import PhotoValidationError
+from application.web.views.category_ad.schemas import CategoryOutput
+from application.web.views.user.schemas import UserOutput
 
 
 class BaseAdvertisement(BaseModel):
@@ -25,8 +26,8 @@ class BaseAdvertisement(BaseModel):
 
 
 class AdvertisementInput(BaseAdvertisement):
-    author_id: UUID = f(title="Идентификатор автора")
-    category_id: UUID = f(title="Идентификатор категории")
+    author: str | UserOutput = f(title="Идентификатор автора")
+    category: str | CategoryOutput = f(title="Идентификатор категории")
 
 
 class AdvertisementInputUpdate(BaseAdvertisement):
@@ -37,4 +38,8 @@ class AdvertisementInputUpdate(BaseAdvertisement):
     photo: Optional[list[str]] = None
 
 
-AdvertisementOutput = Advertisement
+class AdvertisementOutput(AdvertisementInput):
+    oid: str
+    status: str
+    approved_at: datetime | None
+

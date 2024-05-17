@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from .moderation import Moderation as DomainModeration
+from application.domain.entities.moderation import Moderation as DomainModeration
 
 
 class AbstractModerationRepository(ABC):
@@ -10,5 +10,5 @@ class AbstractModerationRepository(ABC):
         raise NotImplemented
 
     @abstractmethod
-    async def get(self, moderation_oid) -> DomainModeration | None:
+    async def get(self, moderation_oid: str) -> DomainModeration | None:
         raise NotImplemented

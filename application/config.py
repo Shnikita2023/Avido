@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+BASE_DIR = Path(__file__).parent.parent
 
 
 class DbSettings(BaseSettings):
@@ -14,8 +18,23 @@ class DbSettings(BaseSettings):
                 f"{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}")
 
 
+class SessionCookie(BaseSettings):
+    COOKIE_SESSION_KEY: str
+    COOKIE_SESSION_TIME: int
+
+
+class AuthJWT(BaseSettings):
+    PRIVATE_KEY: Path = BASE_DIR / "certs" / "jwt-private.pem"
+    PUBLIC_KEY: Path = BASE_DIR / "certs" / "jwt-public.pem"
+    ALGORITHM: str = "RS256"
+    ACCESS_TOKEN_EXPIRE_MINUTE: int
+    REFRESH_TOKEN_EXPIRE_MINUTE: int
+
+
 class Settings:
     db: DbSettings = DbSettings()
+    auth_jwt: AuthJWT = AuthJWT()
+    session_cookie: SessionCookie = SessionCookie()
 
 
 settings = Settings()

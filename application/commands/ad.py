@@ -1,16 +1,14 @@
-from application.domain.moderation.moderation import Moderation
-from application.infrastructure.bus.local import DomainCommand, subscribe
-from application.services.ad import AdvertisementService
+from application.events import IsApprovedAd, DomainCommand
+from application.infrastructure.message_bus import subscribe
+from application.services.ad.ad import advertisement_service
 
 
-def filter_by_approve_ad(command: DomainCommand) -> bool:
-    return isinstance(command, Moderation.ApproveAd)
+def filter_by_is_approve_ad(command: DomainCommand) -> bool:
+    return isinstance(command, IsApprovedAd)
 
 
-@subscribe(filter_by_approve_ad)
-async def approve_ad(command: DomainCommand):
+@subscribe(filter_by_is_approve_ad)
+async def is_approve_ad(command: IsApprovedAd):
+    await advertisement_service.change_ad_status_on_active_or_rejected(command.ad_oid, command.is_approved)
 
-    service = AdvertisementService()
-
-    await service.approve(command.ad_id)
 

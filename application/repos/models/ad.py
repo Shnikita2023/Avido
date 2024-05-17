@@ -5,7 +5,8 @@ from uuid import UUID
 from sqlalchemy import ForeignKey, String, text, types, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from application.domain.ad.ad import Advertisement as DomainAdvertisement
+from application.domain.entities.ad import Advertisement as DomainAdvertisement
+from application.domain.value_objects.ad import Status, Photo
 from application.infrastructure.database import Base
 
 
@@ -42,7 +43,7 @@ class Advertisement(Base):
                 approved_at=advertisement.approved_at,
                 price=advertisement.price,
                 number_of_views=advertisement.number_of_views,
-                photo=advertisement.photo,
+                photo=advertisement.photo.value,
                 status=advertisement.status.name,
                 author_id=advertisement.author.oid,
                 category_id=advertisement.category.oid
@@ -50,7 +51,7 @@ class Advertisement(Base):
 
     def to_entity(self) -> DomainAdvertisement:
         return DomainAdvertisement(
-            oid=self.oid,
+            oid=str(self.oid),
             title=self.title,
             city=self.city,
             description=self.description,
@@ -58,8 +59,8 @@ class Advertisement(Base):
             approved_at=self.approved_at,
             price=self.price,
             number_of_views=self.number_of_views,
-            photo=self.photo,
-            status=DomainAdvertisement.Status[self.status],
+            photo=Photo(self.photo),
+            status=Status[self.status],
             author=self.user.to_entity(),
             category=self.category.to_entity()
         )
@@ -75,7 +76,7 @@ class Advertisement(Base):
             "approved_at": advertisement.approved_at,
             "price": advertisement.price,
             "number_of_views": advertisement.number_of_views,
-            "photo": advertisement.photo,
+            "photo": advertisement.photo.value,
             "status": advertisement.status.name,
             "author_id": advertisement.author.oid,
             "category_id": advertisement.category.oid

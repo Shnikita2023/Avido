@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import ForeignKey, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from application.domain.moderation.moderation import Moderation as DomainModeration
+from application.domain.entities.moderation import Moderation as DomainModeration
 from application.infrastructure.database import Base
 
 
@@ -15,7 +15,7 @@ class Moderation(Base):
     oid: Mapped[UUID] = mapped_column(types.Uuid,
                                       primary_key=True,
                                       server_default=text("gen_random_uuid()"))
-    moderation_date: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
+    created_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
     is_approved: Mapped[bool]
     rejection_reason: Mapped[str]
 
@@ -39,8 +39,8 @@ class Moderation(Base):
 
     def to_entity(self) -> DomainModeration:
         return DomainModeration(
-            oid=self.oid,
-            moderation_date=self.moderation_date,
+            oid=str(self.oid),
+            moderation_date=self.created_at,
             is_approved=self.is_approved,
             rejection_reason=self.rejection_reason,
             advertisement_id=self.advertisement_id,
