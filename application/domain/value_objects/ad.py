@@ -13,7 +13,7 @@ class Status(str, Enum):
     ACTIVE = "Опубликована"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Photo(BaseValueObjects):
     value: list[str]
 

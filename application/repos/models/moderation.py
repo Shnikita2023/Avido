@@ -30,7 +30,7 @@ class Moderation(Base):
     def from_entity(cls, moderation: DomainModeration) -> "Moderation":
         return cls(
             oid=moderation.oid,
-            moderation_date=moderation.moderation_date,
+            created_at=moderation.created_at,
             is_approved=moderation.is_approved,
             rejection_reason=moderation.rejection_reason,
             moderator_id=moderation.moderator_id,
@@ -40,9 +40,9 @@ class Moderation(Base):
     def to_entity(self) -> DomainModeration:
         return DomainModeration(
             oid=str(self.oid),
-            moderation_date=self.created_at,
+            created_at=self.created_at,
             is_approved=self.is_approved,
             rejection_reason=self.rejection_reason,
-            advertisement_id=self.advertisement_id,
-            moderator_id=self.moderator_id
+            advertisement_id=str(self.advertisement_id),
+            moderator_id=str(self.moderator_id)
         )

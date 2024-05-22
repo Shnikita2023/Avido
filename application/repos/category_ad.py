@@ -1,5 +1,4 @@
 from typing import Optional, Any
-from uuid import UUID
 
 from sqlalchemy import select, delete
 from sqlalchemy.exc import SQLAlchemyError

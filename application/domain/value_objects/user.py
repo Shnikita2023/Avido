@@ -10,7 +10,7 @@ from application.constants import (
 from application.domain.value_objects.base import BaseValueObjects
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Email(BaseValueObjects):
     value: str
 
@@ -21,7 +21,7 @@ class Email(BaseValueObjects):
             raise ValueError(EMAIL_ERROR)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Phone(BaseValueObjects):
     value: str
 
@@ -30,7 +30,7 @@ class Phone(BaseValueObjects):
             raise ValueError(PHONE_ERROR)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class FullName(BaseValueObjects):
     value: str
 
@@ -40,7 +40,7 @@ class FullName(BaseValueObjects):
             raise ValueError(FULLNAME_ERROR)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Password(BaseValueObjects):
     value: str
 
@@ -67,9 +67,9 @@ class Password(BaseValueObjects):
         if not re.search(PASSWORD_REGEX, self.value):
             raise ValueError(PASSWORD_SPECIAL_CHAR_ERROR)
 
-    @property
-    def encode(self) -> bytes:
-        return self.value.encode("utf-8")
+    # @property
+    # def encode(self) -> bytes:
+    #     return self.value.encode("utf-8")
 
 
 class Role(str, Enum):

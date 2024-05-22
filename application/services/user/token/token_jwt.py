@@ -1,13 +1,10 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from typing import Annotated
 
 import jwt
-from fastapi import Depends, Response
 
 from application.config import settings
 from application.exceptions.domain import InvalidTokenError
-from application.services.user.token.cookie_token import cookie_helper
 from application.web.views.user.schemas import UserOutput
 
 
@@ -51,7 +48,6 @@ class TokenJWTService(TokenAbstractService):
     def decode_token(cls, token: bytes | str) -> dict:
         try:
             decoded: dict = jwt.decode(jwt=token, key=cls.PUBLIC_KEY, algorithms=[cls.ALGORITHM])
-
         except jwt.ExpiredSignatureError:
             decoded: dict = jwt.decode(jwt=token,
                                        key=cls.PUBLIC_KEY,
@@ -68,7 +64,7 @@ class TokenWork:
     def __init__(self, token_service: TokenAbstractService):
         self.token_service = token_service
 
-    def create_tokens(self, user: UserOutput, response: Response) -> tuple:
+    def create_tokens(self, user: UserOutput) -> tuple:
         access_jwt_payload = {
             "sub": user.oid,
             "first_name": user.first_name,
@@ -78,7 +74,6 @@ class TokenWork:
         refresh_jwt_payload = {"sub": user.oid}
         access_token = self.token_service.encode_token(payload=access_jwt_payload)
         refresh_token = self.token_service.encode_token(payload=refresh_jwt_payload)
-        cookie_helper.create_cookie_for_tokens(response, access_token, refresh_token)
         return access_token, refresh_token
 
     def create_new_access_token(self, access_token_payload: dict) -> str:
@@ -90,7 +85,6 @@ class TokenWork:
                              refresh_token_payload: dict) -> str | None:
         expire_access_token = datetime.fromtimestamp(access_token_payload["exp"])
         expire_refresh_token = datetime.fromtimestamp(refresh_token_payload["exp"])
-
         if expire_access_token <= datetime.now() and expire_refresh_token <= datetime.now():
             raise InvalidTokenError
 
@@ -98,26 +92,6 @@ class TokenWork:
             return self.create_new_access_token(access_token_payload)
 
         return None
-
-    def get_current_token_payload(self,
-                                  cookie_tokens: Annotated[str, Depends(cookie_helper.get_cookie_tokens)],
-                                  response: Response) -> dict | None:
-        if not cookie_tokens:
-            return None
-
-        try:
-            access_token, refresh_token = cookie_helper.parsing_cookie_tokens(cookie_tokens)
-            access_token_payload: dict = self.token_service.decode_token(token=access_token)
-            refresh_token_payload: dict = self.token_service.decode_token(token=refresh_token)
-            new_token: str | None = self.check_expires_tokens(access_token_payload, refresh_token_payload)
-
-            if new_token:
-                cookie_helper.create_cookie_for_tokens(response, new_token, refresh_token)
-
-            return access_token_payload
-
-        except jwt.InvalidTokenError:
-            raise InvalidTokenError
 
 
 token_jwt_service = TokenJWTService()

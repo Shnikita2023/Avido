@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from pydantic import Field as f
 
 from application.domain.entities.base import BaseEntity
@@ -10,10 +12,11 @@ class Moderation(BaseEntity):
     rejection_reason: str = f(title="Причина отказа", default_factory=str, max_length=250)
 
     @classmethod
-    def from_schema(cls, schema) -> "Moderation":
+    def from_json(cls, json: dict[str, str]) -> "Moderation":
         return cls(
-            advertisement_id=schema.advertisement_id,
-            is_approved=schema.is_approved,
-            rejection_reason=schema.rejection_reason,
-            moderator_id=schema.moderator_id,
+            is_approved=json["is_approved"],
+            rejection_reason=json["rejection_reason"],
+            advertisement_id=json["advertisement_id"],
+            moderator_id=json["moderator_id"],
+            oid=json["oid"] if json.get("oid") else str(uuid4())
         )

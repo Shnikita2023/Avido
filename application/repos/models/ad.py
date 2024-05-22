@@ -77,7 +77,7 @@ class Advertisement(Base):
             "price": advertisement.price,
             "number_of_views": advertisement.number_of_views,
             "photo": advertisement.photo.value,
-            "status": advertisement.status.name,
+            "status": advertisement.status.name if isinstance(advertisement.status, Status) else advertisement.status,
             "author_id": advertisement.author.oid,
             "category_id": advertisement.category.oid
         }

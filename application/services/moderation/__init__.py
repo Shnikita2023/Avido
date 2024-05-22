@@ -1,1 +1,6 @@
-from .moderation import moderation_service
+__all__ = (
+    "ModerationService",
+    'get_moderation_service'
+)
+
+from .moderation import ModerationService, get_moderation_service

@@ -1,17 +1,16 @@
 import logging
-from typing import Optional, Any, Annotated
+from typing import Optional, Any
 
-from fastapi import Form, Response, Depends
+from fastapi import Form
 
+from application.context import user as user_context
 from application.domain.entities.user import User as DomainUser
 from application.exceptions.domain import (
-    UserNotFoundError, UserAlreadyExistsError, InvalidUserDataError,
-    InvalidCookieError, AccessDeniedError
+    UserNotFoundError, UserAlreadyExistsError,
+    AccessDeniedError, InvalidUserDataError,
 )
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
 from application.repos.uow.unit_of_work import AbstractUnitOfWork
-from application.services.user.security.password_utils import hash_password, compare_passwords
-from application.services.user.token.token_jwt import token_work
 from application.web.views.user.schemas import UserOutput, UserInput
 
 logger = logging.getLogger(__name__)
@@ -27,7 +26,7 @@ class UserService:
         async with self.uow:
             user: Optional[DomainUser] = await self.uow.users.get(user_oid)
             if user:
-                return user.to_schema()
+                return UserOutput.to_schema(user)
 
             raise UserNotFoundError
 
@@ -69,13 +68,13 @@ class UserService:
             if existing_user:
                 raise UserAlreadyExistsError
 
-            user: DomainUser = DomainUser.to_entity(user_schema)
+            user: DomainUser = user_schema.to_domain()
             user.encrypt_password()
             await self.uow.users.add(user)
             await self.uow.commit()
             await self._on_after_create_user(user_schema)
-            logger.info(f"Пользователь с id {user_entity.oid} успешно создан. Status: 201")
-            return user_entity.to_schema()
+            logger.info(f"Пользователь с id {user.oid} успешно создан. Status: 201")
+            return UserOutput.to_schema(user)
 
     @staticmethod
     async def _on_after_create_user(user_schema: UserInput) -> None:
@@ -93,27 +92,14 @@ class UserService:
             if not user or email != user.email.value or not user.is_password_valid(password):
                 raise InvalidUserDataError
             logger.info(f"Успешно пройдена валидация пользователя '{user.first_name}'. Status: 200")
-            return user.to_schema()
-
-    async def get_current_auth_user(self,
-                                    payload: Annotated[Optional[dict], Depends(token_work.get_current_token_payload)]) -> dict:
-        if payload:
-            user_oid: str = payload.get("sub")
-            async with self.uow:
-                user: UserOutput = await self.get_user_by_id(user_oid)
-
-            logger.info(f"Получение данных о пользователе '{user.first_name}'. Status: 200")
-            return payload
-
-        return {}
+            return UserOutput.to_schema(user)
 
     @staticmethod
-    async def check_authentication(user_current: dict, role_required: tuple = ("USER",)) -> None:
-        if not user_current:
-            raise InvalidCookieError
-
-        if user_current.get("role") not in role_required:
+    async def check_role(role: tuple = ("USER",)) -> None:
+        user_current = user_context.value
+        if user_current.get("role") not in role:
             raise AccessDeniedError
 
 
-user_service = UserService()
+def get_user_service() -> UserService:
+    return UserService()

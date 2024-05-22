@@ -12,11 +12,16 @@ class Base(DeclarativeBase):
 
 DATABASE_URL: str = settings.db.database_url_asyncpg
 
-engine: AsyncEngine = create_async_engine(DATABASE_URL, echo=False)
+engine: AsyncEngine = create_async_engine(DATABASE_URL,
+                                          echo=settings.db.ECHO,
+                                          echo_pool=settings.db.ECHO_POOL,
+                                          pool_size=settings.db.POOL_SIZE,
+                                          max_overflow=settings.db.MAX_OVERFLOW)
 async_session_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(
-    engine,
+    bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
+    autoflush=False
 )
 
 

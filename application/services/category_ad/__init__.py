@@ -1,1 +1,1 @@
-from .category_ad import category_ad
+from .category_ad import get_category_ad_service, CategoryAdService

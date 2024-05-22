@@ -8,7 +8,6 @@ from .base import BaseEntity
 from .category_ad import Category
 from .user import User
 from ..value_objects.ad import Status, Photo
-from application.web.views.ad.schemas import AdvertisementOutput, AdvertisementInput
 
 
 class Advertisement(BaseEntity):
@@ -24,31 +23,16 @@ class Advertisement(BaseEntity):
     category: Category = f(title="Категория")
 
     @classmethod
-    def to_entity(cls, schema: AdvertisementInput | AdvertisementOutput) -> "Advertisement":
-        author: User = User.to_entity(schema.author)
-        category: Category = Category.to_entity(schema.category)
+    def from_json(cls, json: dict[str, str]) -> "Advertisement":
         return cls(
-                oid=schema.oid if isinstance(schema, AdvertisementOutput) else str(uuid4()),
-                title=schema.title,
-                city=schema.city,
-                description=schema.description,
-                price=schema.price,
-                photo=Photo(schema.photo),
-                status=Status[schema.status] if isinstance(schema, AdvertisementOutput) else Status.DRAFT,
-                author=author,
-                category=category
-            )
-
-    def to_schema(self) -> AdvertisementOutput:
-        return AdvertisementOutput(
-            oid=self.oid,
-            title=self.title,
-            city=self.city,
-            description=self.description,
-            price=self.price,
-            photo=self.photo.value,
-            status=self.status.name,
-            approved_at=self.approved_at,
-            author=self.author.to_schema(),
-            category=self.category.to_schema()
+            title=json["title"],
+            city=json["city"],
+            description=json["description"],
+            price=json["price"],
+            photo=Photo(json["photo"]),
+            author=User.from_json(json["author"]),
+            status=Status[json["status"]] if json.get("status") else Status.DRAFT,
+            category=json["category"],
+            oid=json["oid"] if json.get("oid") else str(uuid4())
         )
+

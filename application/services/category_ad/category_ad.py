@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from application.domain.entities.category_ad import Category as DomainCategory
 from application.exceptions.domain import CategoryNotFoundError, CategoryAlreadyExistsError
@@ -16,9 +16,9 @@ class CategoryAdService:
 
     async def get_category_by_id(self, category_oid: str) -> CategoryOutput:
         async with self.uow:
-            category = await self.uow.category.get(category_oid)
+            category: DomainCategory | None = await self.uow.category.get(category_oid)
             if category:
-                return category.to_schema()
+                return CategoryOutput.to_schema(category)
 
             raise CategoryNotFoundError
 
@@ -31,20 +31,21 @@ class CategoryAdService:
     async def create_category(self, category_schema: CategoryInput) -> CategoryOutput:
         async with self.uow:
             params_search = {"title": category_schema.title}
-            exist_category: CategoryOutput = await self.check_existing_category(params_search)
+            exist_category: Optional[CategoryOutput] = await self.check_existing_category(params_search)
             if exist_category:
                 raise CategoryAlreadyExistsError
 
-            category_entity: DomainCategory = DomainCategory.to_entity(category_schema)
-            await self.uow.category.add(category_entity)
+            category: DomainCategory = category_schema.to_domain()
+            await self.uow.category.add(category)
             await self.uow.commit()
-            return category_entity.to_schema()
+            return CategoryOutput.to_schema(category)
 
-    async def check_existing_category(self, params: dict[str, Any]) -> CategoryOutput:
+    async def check_existing_category(self, params: dict[str, Any]) -> Optional[CategoryOutput]:
         async with self.uow:
-            exist_category = await self.uow.category.get_by_params(params)
-            return exist_category.to_schema()
+            exist_category: DomainCategory | None = await self.uow.category.get_by_params(params)
+            if exist_category:
+                return CategoryOutput.to_schema(exist_category)
 
 
-def make_category_ad_service():
+def get_category_ad_service() -> CategoryAdService:
     return CategoryAdService()

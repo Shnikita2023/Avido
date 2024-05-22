@@ -1,15 +1,17 @@
 import logging
 from datetime import datetime
 
-from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from application.exceptions.base import ApplicationException
-from application.web.views import router as router_v1
+from application.infrastructure.middlewares.middleware import AuthMiddleware
+from application.services.user.token.token_jwt import token_jwt_service
+from application.web import router as router_v1
 
-app = FastAPI(version="1.1.1", title="Avido", docs_url="/api/docs", debug=True)
 logger = logging.getLogger(__name__)
+app = FastAPI(version="1.1.1", title="Avido", docs_url="/api/docs", debug=True)
 
 
 @app.exception_handler(ApplicationException)
@@ -21,6 +23,7 @@ async def application_exception_handler(request: Request, exc: ApplicationExcept
 
 app.include_router(router_v1, prefix="/api/v1")
 
+app.add_middleware(AuthMiddleware, token_service=token_jwt_service)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

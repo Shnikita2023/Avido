@@ -1,1 +1,1 @@
-from .ad import advertisement_service
+from .ad import AdvertisementService, get_ad_service

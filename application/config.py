@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).parent.parent
@@ -11,6 +12,10 @@ class DbSettings(BaseSettings):
     DB_NAME: str
     DB_USER: str
     DB_PASS: str
+    ECHO: bool
+    ECHO_POOL: bool
+    POOL_SIZE: int
+    MAX_OVERFLOW: int
 
     @property
     def database_url_asyncpg(self) -> str:
@@ -26,9 +31,16 @@ class SessionCookie(BaseSettings):
 class AuthJWT(BaseSettings):
     PRIVATE_KEY: Path = BASE_DIR / "certs" / "jwt-private.pem"
     PUBLIC_KEY: Path = BASE_DIR / "certs" / "jwt-public.pem"
+    EXCLUDE_PATHS: str
     ALGORITHM: str = "RS256"
     ACCESS_TOKEN_EXPIRE_MINUTE: int
     REFRESH_TOKEN_EXPIRE_MINUTE: int
+
+    @field_validator('EXCLUDE_PATHS')
+    @classmethod
+    def split_paths(cls, paths: str) -> tuple[str]:
+        paths_list: list[str] = paths.split(',')
+        return tuple(paths_list)
 
 
 class Settings:

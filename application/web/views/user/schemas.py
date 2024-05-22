@@ -5,6 +5,7 @@ from pydantic import BaseModel, field_validator, Field as f
 from application.constants import (
     PASSWORD_LENGTH_ERROR, PASSWORD_LOWERCASE_ERROR, PASSWORD_DIGIT_ERROR,
     PASSWORD_SPECIAL_CHAR_ERROR, PASSWORD_UPPERCASE_ERROR, EMAIL_ERROR)
+from application.domain.entities.user import User as DomainUser
 from application.exceptions.domain import (
     FullNameValidationError, PhoneValidationError,
     EmailValidationError, PasswordValidationError
@@ -78,11 +79,25 @@ class UserInput(UserBase):
 
         return password
 
-    def to_domain(self) -> User:
-        return User.from_json(**self.model_dump(mode="python"))
+    def to_domain(self) -> DomainUser:
+        return DomainUser.from_json(self.model_dump())
 
 
 class UserOutput(UserBase):
     oid: str
     role: str
     status: str
+
+    @staticmethod
+    def to_schema(user: DomainUser) -> "UserOutput":
+        return UserOutput(
+            oid=user.oid,
+            first_name=user.first_name.value,
+            last_name=user.last_name.value,
+            middle_name=user.middle_name.value,
+            email=user.email.value,
+            number_phone=user.number_phone.value,
+            time_call=user.time_call,
+            role=user.role.name,
+            status=user.status.value
+        )
