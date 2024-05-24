@@ -23,7 +23,7 @@ async def application_exception_handler(request: Request, exc: ApplicationExcept
 
 app.include_router(router_v1, prefix="/api/v1")
 
-app.add_middleware(AuthMiddleware, token_service=token_jwt_service)
+app.add_middleware(AuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

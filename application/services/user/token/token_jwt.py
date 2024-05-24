@@ -1,7 +1,9 @@
+import json
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 
 import jwt
+from fastapi import Request
 
 from application.config import settings
 from application.exceptions.domain import InvalidTokenError
@@ -80,18 +82,39 @@ class TokenWork:
         new_access_token: str = self.token_service.encode_token(payload=access_token_payload)
         return new_access_token
 
-    def check_expires_tokens(self,
-                             access_token_payload: dict,
-                             refresh_token_payload: dict) -> str | None:
-        expire_access_token = datetime.fromtimestamp(access_token_payload["exp"])
-        expire_refresh_token = datetime.fromtimestamp(refresh_token_payload["exp"])
-        if expire_access_token <= datetime.now() and expire_refresh_token <= datetime.now():
+    def check_active_tokens(self, access_token: str, refresh_token: str) -> tuple[dict, dict]:
+        try:
+            access_token_payload: dict = self.token_service.decode_token(token=access_token)
+            refresh_token_payload: dict = self.token_service.decode_token(token=refresh_token)
+            self.check_expires_tokens(access_token_payload, refresh_token_payload)
+            return access_token_payload, refresh_token_payload
+
+        except jwt.InvalidTokenError:
             raise InvalidTokenError
 
-        if expire_access_token <= datetime.now():
-            return self.create_new_access_token(access_token_payload)
+    @staticmethod
+    async def get_tokens_from_headers(request: Request) -> tuple[str, str]:
+        try:
+            payload = request.headers.get('Authorization')
+            tokens_data: dict = json.loads(payload)
+            token_type: str = tokens_data.get("token_type")
+            access_token: str = tokens_data.get("access_token")
+            refresh_token: str = tokens_data.get("refresh_token")
+            if not access_token or not refresh_token or token_type != "Bearer":
+                raise ValueError("No validate tokens data")
 
-        return None
+            return access_token, refresh_token
+
+        except (json.JSONDecodeError, ValueError):
+            raise InvalidTokenError
+
+    @staticmethod
+    def check_expires_tokens(access_token_payload: dict,
+                             refresh_token_payload: dict) -> None:
+        expire_access_token = datetime.fromtimestamp(access_token_payload["exp"])
+        expire_refresh_token = datetime.fromtimestamp(refresh_token_payload["exp"])
+        if expire_access_token <= datetime.now() or expire_refresh_token <= datetime.now():
+            raise InvalidTokenError
 
 
 token_jwt_service = TokenJWTService()

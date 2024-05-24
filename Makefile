@@ -8,10 +8,10 @@ include .env.dev
 export
 
 run_server:
-	uvicorn application.web.app:app --reload
+	uvicorn application.web.app:app --reload --port 8000
 
 dev_migration:
-	alembic revision --autogenerate -m "Initial tables v4"
+	alembic revision --autogenerate -m "Initial tables v1"
 
 dev_upgrade:
 	alembic upgrade head
