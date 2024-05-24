@@ -24,8 +24,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             if request.url.path.endswith(self.EXCLUDE_PATHS):
                 return await call_next(request)
 
-            access_token, refresh_token = await token_work.get_tokens_from_headers(request)
-            access_token_payload, refresh_token_payload = token_work.check_active_tokens(access_token, refresh_token)
+            access_token_payload = token_work.get_current_token_payload(request=request)
             user_context.set(access_token_payload)
             response: Response = await call_next(request)
             return response

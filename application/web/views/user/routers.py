@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
+from fastapi.security import HTTPBearer
 
 from application.context import user as user_context
 from application.exceptions.domain import AccessDeniedError
@@ -9,9 +10,11 @@ from application.services.user.token.token_jwt import token_work
 from application.services.user import UserService, get_user_service
 from application.web.views.user.schemas import UserOutput, UserInput
 
+http_bearer = HTTPBearer(auto_error=False)
 
 router = APIRouter(prefix="/user",
-                   tags=["User"])
+                   tags=["User"],
+                   dependencies=[Depends(http_bearer)])
 
 
 @router.get(path="/",
@@ -43,6 +46,16 @@ async def add_user(user_service: Annotated[UserService, Depends(get_user_service
 async def login_user(user: Annotated[UserOutput, Depends(UserService().validate_auth_user)]) -> TokenInfo:
     access_token, refresh_token = token_work.create_tokens(user=user)
     return TokenInfo(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.post(path="/refresh",
+             response_model=TokenInfo,
+             response_model_exclude_none=True,
+             summary="Обновление access токена",
+             status_code=status.HTTP_200_OK)
+async def refresh_access_token(payload: Annotated[dict, Depends(token_work.get_current_token_payload)]) -> TokenInfo:
+    access_token = token_work.refresh_access_token(payload)
+    return TokenInfo(access_token=access_token)
 
 
 @router.get(path="/me",
