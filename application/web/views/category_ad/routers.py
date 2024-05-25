@@ -16,7 +16,8 @@ router = APIRouter(prefix="/category-advertisement",
             response_model=CategoryOutput)
 async def get_category_ad(category_service: Annotated[CategoryAdService, Depends(get_category_ad_service)],
                           category_oid: str) -> CategoryOutput:
-    return await category_service.get_category_by_id(category_oid=category_oid)
+    category = await category_service.get_category_by_id(category_oid=category_oid)
+    return CategoryOutput.to_schema(category)
 
 
 @router.post(path="/",
@@ -25,9 +26,10 @@ async def get_category_ad(category_service: Annotated[CategoryAdService, Depends
              response_model=CategoryOutput)
 async def add_category_ad(category_service: Annotated[CategoryAdService, Depends(get_category_ad_service)],
                           user_service: Annotated[UserService, Depends(get_user_service)],
-                          category: CategoryInput) -> CategoryOutput:
-    await user_service.check_role(role=("ADMIN",))
-    return await category_service.create_category(category_schema=category)
+                          category_schema: CategoryInput) -> CategoryOutput:
+    user_service.check_role(role=("ADMIN",))
+    category = await category_service.create_category(category=category_schema.to_domain())
+    return CategoryOutput.to_schema(category)
 
 
 @router.delete(path="/",
@@ -36,5 +38,5 @@ async def add_category_ad(category_service: Annotated[CategoryAdService, Depends
 async def delete_category_ad(category_service: Annotated[CategoryAdService, Depends(get_category_ad_service)],
                              user_service: Annotated[UserService, Depends(get_user_service)],
                              category_oid: str) -> None:
-    await user_service.check_role(role=("ADMIN",))
+    user_service.check_role(role=("ADMIN",))
     return await category_service.delete_category_by_id(category_oid)

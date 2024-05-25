@@ -7,7 +7,6 @@ from fastapi.responses import JSONResponse
 
 from application.exceptions.base import ApplicationException
 from application.infrastructure.middlewares.middleware import AuthMiddleware
-from application.services.user.token.token_jwt import token_jwt_service
 from application.web import router as router_v1
 
 logger = logging.getLogger(__name__)

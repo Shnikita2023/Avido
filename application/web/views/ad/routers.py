@@ -17,14 +17,17 @@ router = APIRouter(prefix="/advertisement",
             response_model=AdvertisementOutput)
 async def get_advertisement(ad_service: Annotated[AdvertisementService, Depends(get_ad_service)],
                             advertisement_oid: str) -> AdvertisementOutput:
-    return await ad_service.get_advertisement_by_id(advertisement_oid)
+    advertisement = await ad_service.get_advertisement_by_id(advertisement_oid)
+    return AdvertisementOutput.to_schema(advertisement)
 
 
 @router.get(path="/all",
             summary="Получение всех объявлений",
-            status_code=status.HTTP_200_OK)
-async def get_all_ad(ad_service: Annotated[AdvertisementService, Depends(get_ad_service)]):
-    return await ad_service.get_all_advertisements()
+            status_code=status.HTTP_200_OK,
+            response_model=list[AdvertisementOutput])
+async def get_all_ad(ad_service: Annotated[AdvertisementService, Depends(get_ad_service)]) -> list[AdvertisementOutput]:
+    advertisements = await ad_service.get_all_advertisements()
+    return [AdvertisementOutput.to_schema(ad) for ad in advertisements]
 
 
 @router.post(path="/",
@@ -33,9 +36,10 @@ async def get_all_ad(ad_service: Annotated[AdvertisementService, Depends(get_ad_
              response_model=AdvertisementOutput)
 async def add_advertisement(ad_service: Annotated[AdvertisementService, Depends(get_ad_service)],
                             user_service: Annotated[UserService, Depends(get_user_service)],
-                            advertisement: AdvertisementInput) -> AdvertisementOutput:
-    await user_service.check_role()
-    return await ad_service.create_advertisement(advertisement_schema=advertisement)
+                            advertisement_schema: AdvertisementInput) -> AdvertisementOutput:
+    user_service.check_role()
+    advertisement = await ad_service.create_advertisement(advertisement_schema.to_domain())
+    return AdvertisementOutput.to_schema(advertisement)
 
 
 @router.patch(path="/",
@@ -45,10 +49,11 @@ async def add_advertisement(ad_service: Annotated[AdvertisementService, Depends(
 async def update_partial_advertisement(ad_service: Annotated[AdvertisementService, Depends(get_ad_service)],
                                        user_service: Annotated[UserService, Depends(get_user_service)],
                                        advertisement_oid: str,
-                                       new_advertisement: AdvertisementInputUpdate) -> AdvertisementOutput:
-    await user_service.check_role()
-    return await ad_service.update_advertisement(advertisement_oid=advertisement_oid,
-                                                 advertisement_schema=new_advertisement)
+                                       updated_schema: AdvertisementInputUpdate) -> AdvertisementOutput:
+    user_service.check_role()
+    updated_ad = await ad_service.update_advertisement(advertisement_oid=advertisement_oid,
+                                                       new_advertisement=updated_schema.to_domain())
+    return AdvertisementOutput.to_schema(updated_ad)
 
 
 @router.delete(path="/",
@@ -57,7 +62,7 @@ async def update_partial_advertisement(ad_service: Annotated[AdvertisementServic
 async def delete_advertisement(advertisement_oid: str,
                                user_service: Annotated[UserService, Depends(get_user_service)],
                                ad_service: Annotated[AdvertisementService, Depends(get_ad_service)]) -> None:
-    await user_service.check_role()
+    user_service.check_role()
     return await ad_service.update_advertisement_status_to_removed_by_id(advertisement_oid)
 
 
@@ -69,9 +74,10 @@ async def update_status_advertisement(ad_service: Annotated[AdvertisementService
                                       user_service: Annotated[UserService, Depends(get_user_service)],
                                       advertisement_oid: str,
                                       is_approved: bool) -> AdvertisementOutput:
-    await user_service.check_role(role=("ADMIN", "MODERATOR"))
-    return await ad_service.change_ad_status_on_active_or_rejected(advertisement_oid=advertisement_oid,
-                                                                   is_approved=is_approved)
+    user_service.check_role(role=("ADMIN", "MODERATOR"))
+    updated_ad = await ad_service.change_ad_status_on_active_or_rejected(advertisement_oid=advertisement_oid,
+                                                                         is_approved=is_approved)
+    return AdvertisementOutput.to_schema(updated_ad)
 
 
 @router.get(path="/search",
@@ -89,4 +95,5 @@ async def search_advertisement(ad_service: Annotated[AdvertisementService, Depen
         "price_to": price_to,
         "price_from": price_from
     }
-    return await ad_service.search_advertisements_by_filters(**search_params)
+    advertisements = await ad_service.search_advertisements_by_filters(**search_params)
+    return [AdvertisementOutput.to_schema(ad) for ad in advertisements]

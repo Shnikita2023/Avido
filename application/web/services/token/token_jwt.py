@@ -1,13 +1,17 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
+from typing import Annotated
 
 import jwt
-from fastapi import Request
+from fastapi import Request, Depends
 
 from application.config import settings
 from application.exceptions.domain import InvalidTokenError
-from application.services.user.token.schemas import AccessToken, RefreshToken
+from application.services.user import UserService
 from application.web.views.user.schemas import UserOutput
+
+ACCESS_TOKEN_TYPE = "access"
+REFRESH_TOKEN_TYPE = "refresh"
 
 
 class TokenAbstractService(ABC):
@@ -34,7 +38,7 @@ class TokenJWTService(TokenAbstractService):
     @classmethod
     def encode_token(cls, payload: dict) -> str:
 
-        if payload["type"] == "access":
+        if payload["type"] == ACCESS_TOKEN_TYPE:
             expire_minutes = cls.ACCESS_TOKEN_EXPIRE_MINUTE
         else:
             expire_minutes = cls.REFRESH_TOKEN_EXPIRE_MINUTE
@@ -55,7 +59,7 @@ class TokenJWTService(TokenAbstractService):
             raise InvalidTokenError
 
 
-class TokenWork:
+class TokenManager:
     """
     Класс для работы с токенами пользователей
     """
@@ -63,35 +67,44 @@ class TokenWork:
     def __init__(self, token_service: TokenAbstractService):
         self.token_service = token_service
 
-    def create_tokens(self, user: UserOutput) -> tuple:
-        access_jwt_payload: dict = AccessToken(sub=user.oid,
-                                               first_name=user.first_name,
-                                               email=user.email,
-                                               role=user.role).model_dump()
-        refresh_jwt_payload: dict = RefreshToken(sub=user.oid).model_dump()
-        access_token = self.token_service.encode_token(payload=access_jwt_payload)
-        refresh_token = self.token_service.encode_token(payload=refresh_jwt_payload)
-        return access_token, refresh_token
+    def create_token(self, user_schema: UserOutput, type_token: str) -> str:
+        if type_token == ACCESS_TOKEN_TYPE:
+            jwt_payload: dict = {"sub": user_schema.oid,
+                                 "first_name": user_schema.first_name,
+                                 "email": user_schema.email,
+                                 "role": user_schema.role,
+                                 "type": ACCESS_TOKEN_TYPE}
+        else:
+            jwt_payload: dict = {"sub": user_schema.oid, "type": REFRESH_TOKEN_TYPE}
 
-    def refresh_access_token(self, access_token_payload: dict) -> str:
-        new_access_token: str = self.token_service.encode_token(payload=access_token_payload)
-        return new_access_token
+        return self.token_service.encode_token(payload=jwt_payload)
 
-    def get_current_token_payload(self,
-                                  request: Request) -> dict:
+    async def get_current_token_payload(self, request: Request) -> dict:
         try:
-            payload = request.headers.get('Authorization')
-            token: str = payload.split(" ")[1]
+            payload: str | None = request.headers.get('Authorization')
+            if not payload:
+                raise InvalidTokenError
+
+            token: str = payload.split()[1]
             return self.token_service.decode_token(token=token)
 
         except jwt.InvalidTokenError:
             raise InvalidTokenError
 
+    async def get_auth_user_from_token_of_type(self,
+                                               payload: dict,
+                                               token_type: str) -> UserOutput:
+        self.validate_token_type(payload, token_type)
+        return await self.get_user_by_token_sub(payload)
+
     @staticmethod
-    def validate_token_type(
-            payload: dict,
-            token_type: str,
-    ) -> bool:
+    async def get_user_by_token_sub(payload: dict) -> UserOutput:
+        user_oid: str | None = payload.get("sub")
+        user = await UserService().get_user_by_id(user_oid)
+        return UserOutput.to_schema(user)
+
+    @staticmethod
+    def validate_token_type(payload: dict, token_type: str) -> bool:
         current_token_type = payload.get("type")
         if current_token_type == token_type:
             return True
@@ -100,4 +113,4 @@ class TokenWork:
 
 
 token_jwt_service = TokenJWTService()
-token_work = TokenWork(token_jwt_service)
+token_manager = TokenManager(token_jwt_service)

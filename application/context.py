@@ -20,3 +20,8 @@ class ContextWrapper(Generic[ContextVarType]):
 user: ContextWrapper[dict] = ContextWrapper(ContextVar("user", default=None))
 
 
+def get_payload_current_user() -> dict | None:
+    if not user:
+        return None
+
+    return user.value

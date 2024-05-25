@@ -25,13 +25,13 @@ class BaseAdvertisement(BaseModel):
 
         raise PhotoValidationError(len(photo))
 
+    def to_domain(self) -> DomainAdvertisement:
+        return DomainAdvertisement.from_json(self.model_dump())
+
 
 class AdvertisementInput(BaseAdvertisement):
     author: str | UserOutput = f(title="Идентификатор автора")
     category: str | CategoryOutput = f(title="Идентификатор категории")
-
-    def to_domain(self) -> DomainAdvertisement:
-        return DomainAdvertisement.from_json(self.model_dump())
 
 
 class AdvertisementInputUpdate(BaseAdvertisement):

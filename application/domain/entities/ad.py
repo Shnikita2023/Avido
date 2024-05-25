@@ -36,3 +36,12 @@ class Advertisement(BaseEntity):
             oid=json["oid"] if json.get("oid") else str(uuid4())
         )
 
+    def to_json(self) -> dict:
+        return self.model_dump(exclude_none=True)
+
+    def approve(self):
+        self.status = Status.ACTIVE
+        self.approved_at = datetime.utcnow()
+
+    def reject(self):
+        self.status = Status.REJECTED_FOR_REVISION

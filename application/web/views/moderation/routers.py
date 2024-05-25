@@ -16,7 +16,8 @@ router = APIRouter(prefix="/moderation",
             response_model=ModerationOutput)
 async def get_moderation(moderation_service: Annotated[ModerationService, Depends(get_moderation_service)],
                          moderation_oid: str) -> ModerationOutput:
-    return await moderation_service.get_moderation_by_id(moderation_oid)
+    moderation = await moderation_service.get_moderation_by_id(moderation_oid)
+    return ModerationOutput.to_schema(moderation)
 
 
 @router.post(path="/",
@@ -26,5 +27,6 @@ async def get_moderation(moderation_service: Annotated[ModerationService, Depend
 async def add_moderation(moderation_service: Annotated[ModerationService, Depends(get_moderation_service)],
                          user_service: Annotated[UserService, Depends(get_user_service)],
                          moderation_schema: ModerationInput) -> ModerationOutput:
-    await user_service.check_role(role=("ADMIN", "MODERATOR"))
-    return await moderation_service.create_moderation(moderation_schema)
+    user_service.check_role(role=("ADMIN", "MODERATOR"))
+    moderation = await moderation_service.create_moderation(moderation_schema.to_domain())
+    return ModerationOutput.to_schema(moderation)
