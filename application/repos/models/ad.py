@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from application.domain.entities.ad import Advertisement as DomainAdvertisement
 from application.domain.value_objects.ad import Status, Photo
-from application.infrastructure.database import Base
+from . import Base
 
 
 class Advertisement(Base):

@@ -5,7 +5,7 @@ from sqlalchemy import String, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from application.domain.entities.category_ad import Category as DomainCategory
-from application.infrastructure.database import Base
+from . import Base
 
 
 class Category(Base):

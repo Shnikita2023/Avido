@@ -1,4 +1,3 @@
-
 from uuid import uuid4
 
 from pydantic import Field as f
@@ -36,4 +35,3 @@ class User(BaseEntity):
 
     def to_json(self) -> dict:
         return self.model_dump()
-

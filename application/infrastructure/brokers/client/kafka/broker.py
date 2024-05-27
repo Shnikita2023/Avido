@@ -10,13 +10,13 @@ logger = logging.getLogger(__name__)
 
 class KafkaConsumer:
 
-    def __init__(self, group_id: str, topics: str) -> None:
+    def __init__(self, group_id: str, topics: tuple) -> None:
         self.consumer: Optional[aiokafka.AIOKafkaConsumer] = None
         self.group_id = group_id
         self.topics = topics
 
     async def connect(self, url: str) -> aiokafka.AIOKafkaConsumer:
-        self.consumer = aiokafka.AIOKafkaConsumer(self.topics, bootstrap_servers=url, group_id=self.group_id)
+        self.consumer = aiokafka.AIOKafkaConsumer(*self.topics, bootstrap_servers=url, group_id=self.group_id)
         await self.consumer.start()
         logger.info("Успешное подключение к Kafka(consumers)")
         return self.consumer

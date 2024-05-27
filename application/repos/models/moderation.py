@@ -6,7 +6,7 @@ from sqlalchemy import ForeignKey, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from application.domain.entities.moderation import Moderation as DomainModeration
-from application.infrastructure.database import Base
+from . import Base
 
 
 class Moderation(Base):

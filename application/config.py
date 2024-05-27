@@ -46,7 +46,8 @@ class AuthJWT(BaseSettings):
 class KafkaSettings(BaseSettings):
     KAFKA_HOST: str
     KAFKA_PORT: int
-    TOPIC: str
+    USER_TOPIC: str
+    TOKEN_TOPIC: str
     GROUP_ID: str
 
     @property

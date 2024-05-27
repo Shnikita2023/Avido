@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from application.domain.entities.user import User as DomainUser
 from application.domain.value_objects.user import FullName, Phone, Email, Role, Status
-from application.infrastructure.database import Base
+from . import Base
 
 
 class User(Base):

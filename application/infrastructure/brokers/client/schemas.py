@@ -6,13 +6,13 @@ from application.config import settings
 @dataclass
 class ConnectionParamsKafka:
     url: str
-    topic: str
+    topics: tuple
     group_id: str
 
 
 data_connect_kafka = ConnectionParamsKafka(
     url=settings.kafka.url,
-    topic=settings.kafka.TOPIC,
+    topics=(settings.kafka.USER_TOPIC, settings.kafka.TOKEN_TOPIC),
     group_id=settings.kafka.GROUP_ID,
 )
 

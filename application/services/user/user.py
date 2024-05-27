@@ -51,13 +51,12 @@ class UserService:
             await self.uow.commit()
 
     async def create_user(self, user: DomainUser) -> DomainUser:
-        params_search = {"email": user.email, "number_phone": user.number_phone}
+        params_search = {"email": user.email.value, "number_phone": user.number_phone.value}
         async with self.uow:
             existing_user = await self._check_existing_user(params_search)
             if existing_user:
                 raise UserAlreadyExistsError
 
-            user.encrypt_password()
             await self.uow.users.add(user)
             await self.uow.commit()
             await self._on_after_create_user(user)

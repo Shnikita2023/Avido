@@ -12,7 +12,7 @@ from .utils import process_message_kafka
 class ConsumerKafka(Consumer):
     def __init__(self, data: ConnectionParamsKafka):
         self.data = data
-        self.consumer = KafkaConsumer(group_id=data.group_id, topics=data.topic)
+        self.consumer = KafkaConsumer(group_id=data.group_id, topics=data.topics)
 
     async def initialization(self) -> None:
         await self.consumer.connect(url=self.data.url)
