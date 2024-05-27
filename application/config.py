@@ -43,10 +43,22 @@ class AuthJWT(BaseSettings):
         return tuple(paths_list)
 
 
+class KafkaSettings(BaseSettings):
+    KAFKA_HOST: str
+    KAFKA_PORT: int
+    TOPIC: str
+    GROUP_ID: str
+
+    @property
+    def url(self):
+        return f"{self.KAFKA_HOST}:{self.KAFKA_PORT}"
+
+
 class Settings:
     db: DbSettings = DbSettings()
     auth_jwt: AuthJWT = AuthJWT()
     session_cookie: SessionCookie = SessionCookie()
+    kafka: KafkaSettings = KafkaSettings()
 
 
 settings = Settings()

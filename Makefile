@@ -17,4 +17,4 @@ dev_upgrade:
 	alembic upgrade head
 
 script:
-	python -m application.domain.entities.user
+	python -m application.infrastructure.brokers.consumers.kafka

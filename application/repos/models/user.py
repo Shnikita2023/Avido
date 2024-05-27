@@ -1,11 +1,11 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import String, text, types, LargeBinary
+from sqlalchemy import String, text, types
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from application.domain.entities.user import User as DomainUser
-from application.domain.value_objects.user import FullName, Password, Phone, Email, Role, Status
+from application.domain.value_objects.user import FullName, Phone, Email, Role, Status
 from application.infrastructure.database import Base
 
 
@@ -19,7 +19,6 @@ class User(Base):
     last_name: Mapped[str] = mapped_column(String(50))
     middle_name: Mapped[str | None] = mapped_column(String(50))
     email: Mapped[str] = mapped_column(String(50), unique=True, index=True)
-    password: Mapped[bytes] = mapped_column(LargeBinary)
     role: Mapped[str]
     number_phone: Mapped[str] = mapped_column(String(11), unique=True, index=True)
     time_call: Mapped[str] = mapped_column(String(50))
@@ -30,14 +29,12 @@ class User(Base):
     moderations = relationship("Moderation", back_populates="user")
 
     def to_entity(self) -> DomainUser:
-        decode_password = str(self.password, "utf-8")
         return DomainUser(
             oid=str(self.oid),
             first_name=FullName(self.first_name),
             last_name=FullName(self.last_name),
             middle_name=FullName(self.middle_name),
             email=Email(self.email),
-            password=Password(decode_password),
             number_phone=Phone(self.number_phone),
             role=Role[self.role],
             time_call=self.time_call,
@@ -53,7 +50,6 @@ class User(Base):
             last_name=user.last_name.value,
             middle_name=user.middle_name.value,
             email=user.email.value,
-            password=user.password,
             role=user.role.name,
             number_phone=user.number_phone.value,
             time_call=user.time_call,

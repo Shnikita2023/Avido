@@ -2,13 +2,11 @@ import re
 
 from pydantic import BaseModel, field_validator, Field as f
 
-from application.constants import (
-    PASSWORD_LENGTH_ERROR, PASSWORD_LOWERCASE_ERROR, PASSWORD_DIGIT_ERROR,
-    PASSWORD_SPECIAL_CHAR_ERROR, PASSWORD_UPPERCASE_ERROR, EMAIL_ERROR)
+from application.constants import EMAIL_ERROR
 from application.domain.entities.user import User as DomainUser
 from application.exceptions.domain import (
     FullNameValidationError, PhoneValidationError,
-    EmailValidationError, PasswordValidationError
+    EmailValidationError
 )
 
 
@@ -52,32 +50,6 @@ class UserBase(BaseModel):
 
 class UserInput(UserBase):
     password: str
-
-    @field_validator("password")
-    @classmethod
-    def validate_password(cls, password: str) -> str:
-        PASSWORD_REGEX = r"[!@#$%^&*()\-_=+{};:,<.>|\[\]\\/?]"
-        # Проверка на длину пароля
-        if len(password) < 8 or len(password) > 50:
-            raise PasswordValidationError(PASSWORD_LENGTH_ERROR)
-
-        # Проверка на наличие хотя бы одной заглавной буквы
-        if not any(c.isupper() for c in password):
-            raise PasswordValidationError(PASSWORD_UPPERCASE_ERROR)
-
-        # Проверка на наличие хотя бы одной строчной буквы
-        if not any(c.islower() for c in password):
-            raise PasswordValidationError(PASSWORD_LOWERCASE_ERROR)
-
-        # Проверка на наличие хотя бы одной цифры
-        if not any(c.isdigit() for c in password):
-            raise PasswordValidationError(PASSWORD_DIGIT_ERROR)
-
-        # Проверка на наличие хотя бы одного специального символа
-        if not re.search(PASSWORD_REGEX, password):
-            raise PasswordValidationError(PASSWORD_SPECIAL_CHAR_ERROR)
-
-        return password
 
     def to_domain(self) -> DomainUser:
         return DomainUser.from_json(self.model_dump())

@@ -1,13 +1,11 @@
 import logging
 from typing import Optional, Any
 
-from fastapi import Form
-
 from application.context import get_payload_current_user
 from application.domain.entities.user import User as DomainUser
 from application.exceptions.domain import (
     UserNotFoundError, UserAlreadyExistsError,
-    AccessDeniedError, InvalidUserDataError,
+    AccessDeniedError
 )
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
 from application.repos.uow.unit_of_work import AbstractUnitOfWork
@@ -53,8 +51,8 @@ class UserService:
             await self.uow.commit()
 
     async def create_user(self, user: DomainUser) -> DomainUser:
+        params_search = {"email": user.email, "number_phone": user.number_phone}
         async with self.uow:
-            params_search = {"email": user.email, "number_phone": user.number_phone}
             existing_user = await self._check_existing_user(params_search)
             if existing_user:
                 raise UserAlreadyExistsError
@@ -72,17 +70,6 @@ class UserService:
 
     async def _check_existing_user(self, params_search: dict[str, Any]) -> Optional[DomainUser]:
         return await self.uow.users.get_one_by_any_params(params_search)
-
-    async def validate_auth_user(self,
-                                 email: str = Form(),
-                                 password: str = Form()) -> DomainUser:
-        async with self.uow:
-            params_search = {"email": email, "status": "ACTIVE"}
-            user: DomainUser | None = await self.uow.users.get_one_by_all_params(params_search)
-            if not user or email != user.email.value or not user.is_password_valid(password):
-                raise InvalidUserDataError
-            logger.info(f"Успешно пройдена валидация пользователя '{user.first_name}'. Status: 200")
-        return user
 
     @staticmethod
     def check_role(role: tuple = ("USER",)) -> None:
