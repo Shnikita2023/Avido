@@ -28,7 +28,7 @@ async def get_user(user_service: Annotated[UserService, Depends(get_user_service
 
 
 @router.get(path="/me",
-            summary="Получение данных о пользователе",
+            summary="Получение данных текущего пользователя",
             status_code=status.HTTP_200_OK)
 async def get_current_auth_user(current_user: Annotated[dict, Depends(get_payload_current_user)]) -> dict:
     return {

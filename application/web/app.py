@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from application.exceptions.base import ApplicationException
+from application.infrastructure.middlewares import AuthMiddleware
 from application.web import router as router_v1
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ async def application_exception_handler(request: Request, exc: ApplicationExcept
 
 app.include_router(router_v1, prefix="/api/v1")
 
-# app.add_middleware(AuthMiddleware)
+app.add_middleware(AuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

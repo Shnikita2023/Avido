@@ -71,7 +71,7 @@ class UserService:
         return await self.uow.users.get_one_by_any_params(params_search)
 
     @staticmethod
-    def check_role(role: tuple = ("USER",)) -> None:
+    def check_user_role_allowed(role: tuple = ("USER",)) -> None:
         user_current = get_payload_current_user()
         if user_current.get("role") not in role:
             raise AccessDeniedError

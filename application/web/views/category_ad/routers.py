@@ -27,7 +27,7 @@ async def get_category_ad(category_service: Annotated[CategoryAdService, Depends
 async def add_category_ad(category_service: Annotated[CategoryAdService, Depends(get_category_ad_service)],
                           user_service: Annotated[UserService, Depends(get_user_service)],
                           category_schema: CategoryInput) -> CategoryOutput:
-    user_service.check_role(role=("ADMIN",))
+    # user_service.check_user_role_allowed(role=("ADMIN",))
     category = await category_service.create_category(category=category_schema.to_domain())
     return CategoryOutput.to_schema(category)
 
@@ -38,5 +38,5 @@ async def add_category_ad(category_service: Annotated[CategoryAdService, Depends
 async def delete_category_ad(category_service: Annotated[CategoryAdService, Depends(get_category_ad_service)],
                              user_service: Annotated[UserService, Depends(get_user_service)],
                              category_oid: str) -> None:
-    user_service.check_role(role=("ADMIN",))
+    user_service.check_user_role_allowed(role=("ADMIN",))
     return await category_service.delete_category_by_id(category_oid)

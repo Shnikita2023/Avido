@@ -2,16 +2,15 @@ from typing import Optional, Any
 
 from application.context import get_payload_current_user
 from application.domain.entities.ad import Advertisement as DomainAdvertisement
+from application.domain.entities.category_ad import Category as DomainCategory
 from application.exceptions.domain import (
     AdvertisementNotFoundError,
     AdvertisementAlreadyExistsError,
-    AdvertisementStatusError, AccessDeniedError
+    AccessDeniedError, AdvertisementStatusError
 )
 from application.infrastructure.unit_of_work_manager import get_unit_of_work
 from application.repos.uow.unit_of_work import AbstractUnitOfWork
 from application.services.category_ad import CategoryAdService
-from application.services.user import UserService
-from application.web.views.category_ad.schemas import CategoryOutput
 
 
 class AdvertisementService:
@@ -57,7 +56,7 @@ class AdvertisementService:
 
             if name_field == "category":
                 param_search = {"title": value}
-                category_schema: CategoryOutput = await CategoryAdService().check_existing_category(param_search)
+                category_schema: DomainCategory = await CategoryAdService().check_existing_category(param_search)
                 params["category_id"] = category_schema.oid
             else:
                 params[name_field] = value
@@ -85,8 +84,6 @@ class AdvertisementService:
             if existing_ad:
                 raise AdvertisementAlreadyExistsError
 
-            advertisement.author = await UserService().get_user_by_id(advertisement.author.oid)
-            advertisement.category = await CategoryAdService().get_category_by_id(advertisement.category.oid)
             await self.uow.advertisement.add(advertisement)
             await self.uow.commit()
         return advertisement
@@ -98,23 +95,22 @@ class AdvertisementService:
 
     async def update_advertisement(self,
                                    advertisement_oid: str,
-                                   new_advertisement: Optional[DomainAdvertisement] = None
+                                   updated_ad: dict[str, Any]
                                    ) -> DomainAdvertisement:
-        advertisement: DomainAdvertisement = await self.get_advertisement_by_id(advertisement_oid)
-        if self.user_current.get("sub") != advertisement.author.oid:
+        existing_ad: DomainAdvertisement = await self.get_advertisement_by_id(advertisement_oid)
+        if self.user_current.get("sub") != existing_ad.author.oid:
             raise AccessDeniedError
 
-        if advertisement.status not in ("DRAFT", "REJECTED_FOR_REVISION"):
+        if existing_ad.status not in ("DRAFT", "REJECTED_FOR_REVISION"):
             raise AdvertisementStatusError
 
-        updated_advertisement: dict[str, Any] = new_advertisement.to_json()
-        for key, value in updated_advertisement.items():
-            setattr(advertisement, key, value)
+        for field, value in updated_ad.items():
+            setattr(existing_ad, field, value)
 
         async with self.uow:
-            await self.uow.advertisement.update(advertisement)
+            await self.uow.advertisement.update(existing_ad)
             await self.uow.commit()
-        return advertisement
+        return existing_ad
 
     async def change_ad_status_on_active_or_rejected(self,
                                                      advertisement_oid: str,

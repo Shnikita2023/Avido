@@ -27,6 +27,6 @@ async def get_moderation(moderation_service: Annotated[ModerationService, Depend
 async def add_moderation(moderation_service: Annotated[ModerationService, Depends(get_moderation_service)],
                          user_service: Annotated[UserService, Depends(get_user_service)],
                          moderation_schema: ModerationInput) -> ModerationOutput:
-    user_service.check_role(role=("ADMIN", "MODERATOR"))
+    user_service.check_user_role_allowed(role=("ADMIN", "MODERATOR"))
     moderation = await moderation_service.create_moderation(moderation_schema.to_domain())
     return ModerationOutput.to_schema(moderation)

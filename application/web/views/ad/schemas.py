@@ -5,6 +5,8 @@ from typing import Optional
 from pydantic import BaseModel, Field as f, field_validator
 
 from application.domain.entities.ad import Advertisement as DomainAdvertisement
+from application.domain.entities.category_ad import Category as DomainCategory
+from application.domain.entities.user import User as DomainUser
 from application.exceptions.domain import PhotoValidationError
 from application.web.views.category_ad.schemas import CategoryOutput
 from application.web.views.user.schemas import UserOutput
@@ -30,8 +32,8 @@ class BaseAdvertisement(BaseModel):
 
 
 class AdvertisementInput(BaseAdvertisement):
-    author: str | UserOutput = f(title="Идентификатор автора")
-    category: str | CategoryOutput = f(title="Идентификатор категории")
+    author: str | UserOutput | DomainUser = f(title="Идентификатор автора")
+    category: str | CategoryOutput | DomainCategory = f(title="Идентификатор категории")
 
 
 class AdvertisementInputUpdate(BaseAdvertisement):
@@ -55,7 +57,7 @@ class AdvertisementOutput(AdvertisementInput):
             city=ad.city,
             description=ad.description,
             price=ad.price,
-            photo=ad.photo.value,
+            photo=ad.photo,
             status=ad.status.name,
             approved_at=ad.approved_at,
             author=UserOutput.to_schema(ad.author),

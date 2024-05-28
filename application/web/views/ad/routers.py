@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, status, Query, Depends
 
 from application.services.ad import AdvertisementService, get_ad_service
+from application.services.category_ad import CategoryAdService, get_category_ad_service
 from application.services.user import UserService, get_user_service
 from application.web.views.ad.schemas import AdvertisementOutput, AdvertisementInput, AdvertisementInputUpdate
 
@@ -35,10 +36,16 @@ async def get_all_ad(ad_service: Annotated[AdvertisementService, Depends(get_ad_
              status_code=status.HTTP_201_CREATED,
              response_model=AdvertisementOutput)
 async def add_advertisement(ad_service: Annotated[AdvertisementService, Depends(get_ad_service)],
+                            category_service: Annotated[CategoryAdService, Depends(get_category_ad_service)],
                             user_service: Annotated[UserService, Depends(get_user_service)],
                             advertisement_schema: AdvertisementInput) -> AdvertisementOutput:
-    user_service.check_role()
-    advertisement = await ad_service.create_advertisement(advertisement_schema.to_domain())
+    user_service.check_user_role_allowed()
+    user = await user_service.get_user_by_id(user_oid=advertisement_schema.author)
+    category = await category_service.get_category_by_id(category_oid=advertisement_schema.category)
+    updated_advertisement_schema = AdvertisementInput(**advertisement_schema.model_dump(exclude={"author", "category"}),
+                                                      author=user,
+                                                      category=category)
+    advertisement = await ad_service.create_advertisement(advertisement=updated_advertisement_schema.to_domain())
     return AdvertisementOutput.to_schema(advertisement)
 
 
@@ -50,9 +57,10 @@ async def update_partial_advertisement(ad_service: Annotated[AdvertisementServic
                                        user_service: Annotated[UserService, Depends(get_user_service)],
                                        advertisement_oid: str,
                                        updated_schema: AdvertisementInputUpdate) -> AdvertisementOutput:
-    user_service.check_role()
+    user_service.check_user_role_allowed()
     updated_ad = await ad_service.update_advertisement(advertisement_oid=advertisement_oid,
-                                                       new_advertisement=updated_schema.to_domain())
+                                                       updated_ad=updated_schema.model_dump(exclude_none=True))
+
     return AdvertisementOutput.to_schema(updated_ad)
 
 
@@ -62,7 +70,7 @@ async def update_partial_advertisement(ad_service: Annotated[AdvertisementServic
 async def delete_advertisement(advertisement_oid: str,
                                user_service: Annotated[UserService, Depends(get_user_service)],
                                ad_service: Annotated[AdvertisementService, Depends(get_ad_service)]) -> None:
-    user_service.check_role()
+    user_service.check_user_role_allowed()
     return await ad_service.update_advertisement_status_to_removed_by_id(advertisement_oid)
 
 
@@ -74,7 +82,7 @@ async def update_status_advertisement(ad_service: Annotated[AdvertisementService
                                       user_service: Annotated[UserService, Depends(get_user_service)],
                                       advertisement_oid: str,
                                       is_approved: bool) -> AdvertisementOutput:
-    user_service.check_role(role=("ADMIN", "MODERATOR"))
+    user_service.check_user_role_allowed(role=("ADMIN", "MODERATOR"))
     updated_ad = await ad_service.change_ad_status_on_active_or_rejected(advertisement_oid=advertisement_oid,
                                                                          is_approved=is_approved)
     return AdvertisementOutput.to_schema(updated_ad)

@@ -30,7 +30,7 @@ class Advertisement(BaseEntity):
             description=json["description"],
             price=json["price"],
             photo=Photo(json["photo"]),
-            author=User.from_json(json["author"]),
+            author=json["author"],
             status=Status[json["status"]] if json.get("status") else Status.DRAFT,
             category=json["category"],
             oid=json["oid"] if json.get("oid") else str(uuid4())
