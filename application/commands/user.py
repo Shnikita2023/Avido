@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 message_handler: MessageHandler = MessageHandler()
 
 
-@message_handler.register_handler("user_registration")
+@message_handler.register_handler("UserRegisteredEvent")
 async def create_user(decode_message: str) -> None:
     user_message: dict = json.loads(decode_message)
     user: DomainUser = DomainUser.from_json(user_message.get("message"))

@@ -2,16 +2,11 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Event:
+class DomainEvent:
     pass
 
 
 @dataclass
-class DomainCommand(Event):
-    pass
-
-
-@dataclass
-class IsApprovedAd(DomainCommand):
+class IsApprovedAd(DomainEvent):
     ad_oid: str
     is_approved: bool
