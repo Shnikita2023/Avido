@@ -126,14 +126,6 @@ class ModerationNotFoundError(ApplicationException):
         return "The moderation was not found"
 
 
-class InvalidCookieError(ApplicationException):
-    status_code = 401
-
-    @property
-    def message(self) -> str:
-        return "Invalid cookie"
-
-
 class InvalidTokenError(ApplicationException):
     status_code = 401
 
@@ -149,10 +141,3 @@ class AccessDeniedError(ApplicationException):
     def message(self) -> str:
         return "Access denied"
 
-
-class KafkaError(ApplicationException):
-    status_code = 500
-
-    @property
-    def message(self) -> str:
-        return "Ошибка подключение к брокеру Kafka"

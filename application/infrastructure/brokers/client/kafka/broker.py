@@ -3,7 +3,7 @@ from typing import Any, Callable, Coroutine, Optional
 
 import aiokafka
 
-from application.exceptions.domain import KafkaError
+from application.exceptions.broker import KafkaError
 
 logger = logging.getLogger(__name__)
 
