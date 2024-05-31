@@ -32,6 +32,14 @@ class UserService:
             users: list[DomainUser] = await self.uow.users.get_multi(user_oids)
         return users
 
+    async def get_user_by_all_params(self, params: dict[str, Any]) -> Optional[DomainUser]:
+        async with self.uow:
+            user: Optional[DomainUser] = await self.uow.users.get_one_by_any_params(params=params)
+            if user:
+                return user
+
+            raise UserNotFoundError
+
     async def get_all_users(self) -> list[DomainUser]:
         async with self.uow:
             users: list[DomainUser] = await self.uow.users.all()

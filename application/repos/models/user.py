@@ -61,12 +61,12 @@ class User(Base):
     def to_dict(user: DomainUser) -> dict[str, str]:
         return {
             "oid": user.oid,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "middle_name": user.middle_name,
-            "email": user.email,
-            "role": user.role,
-            "number_phone": user.number_phone,
+            "first_name": user.first_name.value,
+            "last_name": user.last_name.value,
+            "middle_name": user.middle_name.value,
+            "email": user.email.value,
+            "role": user.role.name,
+            "number_phone": user.number_phone.value,
             "time_call": user.time_call,
-            "status": user.status
+            "status": user.status.name
         }

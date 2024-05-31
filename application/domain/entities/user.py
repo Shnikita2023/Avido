@@ -30,7 +30,8 @@ class User(BaseEntity):
             email=Email(json["email"]),
             number_phone=Phone(json["number_phone"]),
             time_call=json["time_call"],
-            oid=json["oid"] if json.get("oid") else str(uuid4())
+            oid=json["oid"] if json.get("oid") else str(uuid4()),
+            status=Status[json["status"]] if json["status"] else Status.PENDING
         )
 
     def to_json(self) -> dict:
